@@ -4,9 +4,9 @@ export const walletConnectDefinitions = {
 
     // Metadata used during the wallet connection flow and the dApp connect feature.
     metadata: {
-        name: 'Aragon App',
-        description: 'Aragon App',
-        url: 'https://app.aragon.org',
-        icons: ['https://app.aragon.org/icon.svg'],
+        name: 'Governance Country',
+        description: 'Governance Country',
+        url: 'https://governance.country',
+        icons: ['https://governance.country/icon.png'],
     },
 };

@@ -33,21 +33,31 @@ export class ProxyRpcUtils {
         const isCI = process.env.CI === 'true';
 
         const providerKeys: Partial<Record<RpcProvider, string>> = {};
-        const missingKeys: RpcProvider[] = [];
+        const requiredProviders = new Set<RpcProvider>();
+
+        // Only require env keys for providers actually configured in networkDefinitions
+        for (const def of Object.values(networkDefinitions)) {
+            const cfg = def.privateRpcConfig;
+            if (cfg) {
+                requiredProviders.add(cfg.rpcProvider);
+            }
+        }
+
+        const missingProviders: RpcProvider[] = [];
 
         for (const [provider, envVar] of Object.entries(RPC_PROVIDER_ENV_VARS) as Array<[RpcProvider, string]>) {
             const key = process.env[envVar];
             providerKeys[provider] = key;
 
-            if (!isCI && !key) {
-                missingKeys.push(provider);
+            if (!isCI && requiredProviders.has(provider) && !key) {
+                missingProviders.push(provider);
             }
         }
 
-        if (missingKeys.length > 0) {
-            const missingEnvVars = missingKeys.map((p) => RPC_PROVIDER_ENV_VARS[p]).join(', ');
+        if (missingProviders.length > 0) {
+            const missingEnvVars = missingProviders.map((p) => RPC_PROVIDER_ENV_VARS[p]).join(', ');
             throw new Error(
-                `ProxyRpcUtils: Missing RPC keys for providers: ${missingKeys.join(', ')}. ` +
+                `ProxyRpcUtils: Missing RPC keys for providers: ${missingProviders.join(', ')}. ` +
                     `Required env vars: ${missingEnvVars}`,
             );
         }

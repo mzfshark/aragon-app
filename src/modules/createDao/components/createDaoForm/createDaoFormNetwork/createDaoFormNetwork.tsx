@@ -12,7 +12,7 @@ export const CreateDaoFormNetwork: React.FC<ICreateDaoFormNetworkProps> = () => 
 
     const { onChange: onNetworkChange, ...networkField } = useFormField<ICreateDaoFormData, 'network'>('network', {
         rules: { required: true },
-        defaultValue: Network.ETHEREUM_SEPOLIA,
+        defaultValue: Network.HARMONY_MAINNET,
     });
 
     const testnetTag = { variant: 'neutral' as const, label: t('app.createDao.createDaoForm.network.tag.testnet') };
@@ -22,16 +22,17 @@ export const CreateDaoFormNetwork: React.FC<ICreateDaoFormNetworkProps> = () => 
     const sortedNetworks = Object.entries(networkDefinitions).sort(
         ([, networkA], [, networkB]) => networkA.order - networkB.order,
     );
+    const availableNetworks = sortedNetworks.filter(([, network]) => !network.disabled);
 
     return (
         <RadioGroup onValueChange={onNetworkChange} {...networkField}>
-            {sortedNetworks.map(([key, { disabled, testnet, beta, name, logo }]) => (
+            {availableNetworks.map(([key, { disabled, testnet, beta, name, logo }]) => (
                 <RadioCard
                     key={key}
                     tag={disabled ? disabledTag : testnet ? testnetTag : beta ? betaTag : undefined}
                     value={key}
                     label={name}
-                    disabled={disabled}
+                    disabled={false}
                     avatar={logo}
                     description={
                         key === Network.ETHEREUM_SEPOLIA
