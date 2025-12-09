@@ -11,4 +11,6 @@ export enum Network {
     CHILIZ_MAINNET = 'chiliz-mainnet',
     AVAX_MAINNET = 'avax-mainnet',
     KATANA_MAINNET = 'katana-mainnet',
+    HARMONY_MAINNET = 'harmony-mainnet',
+    HARMONY_TESTNET = 'harmony-testnet',
 }

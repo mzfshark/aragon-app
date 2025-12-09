@@ -117,6 +117,23 @@ environments:
 | **Staging**    | https://stg.app.aragon.org  | Manual through the `Staging` Github workflow | `.env.staging`    |
 | **Production** | https://app.aragon.org      | Manual through the `Release` Github workflow | `.env.production` |
 
+## Harmony Support
+
+This fork includes initial support for Harmony (mainnet and testnet) in the network selector.
+
+- The chains are defined in `src/shared/constants/networkDefinitions.ts` under `HARMONY_MAINNET` and `HARMONY_TESTNET`.
+- After deploying the OSx contracts to Harmony, update the placeholder addresses (`dao`, `daoFactory`, `pluginSetupProcessor`, `globalExecutor`, `conditionFactory`) in that file with your deployed addresses.
+- RPC endpoints default to `https://api.harmony.one` (mainnet) and `https://api.s0.b.hmny.io` (testnet). Override by editing the `rpcUrls` in the same file if needed.
+
+Quick start (WSL):
+
+```bash
+pnpm install
+pnpm dev
+```
+
+Then select Harmony in the app UI and operate with your deployed addresses.
+
 ## Documentation
 
 The Aragon App is built using the following tools to ensure a seamless user experience:

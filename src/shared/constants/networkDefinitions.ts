@@ -103,6 +103,35 @@ const latestProtocolVersion: IContractVersionInfo = {
         "This optional upgrade introduces minor features that make the DAO compatible with the StagedProposalProcessor plugin, enabling complex multi-body governance structures. The upgrade also includes minor bug fixes and ensures full compatibility with Aragon's governance features.",
 };
 
+// Harmony chains (not provided by wagmi in this app)
+const harmonyChain: Chain = {
+    id: 1666600000,
+    name: 'Harmony',
+    network: 'harmony',
+    nativeCurrency: { name: 'Harmony', symbol: 'ONE', decimals: 18 },
+    rpcUrls: {
+        default: { http: ['https://api.harmony.one'] },
+        public: { http: ['https://api.harmony.one'] },
+    },
+    blockExplorers: {
+        default: { name: 'Harmony Explorer', url: 'https://explorer.harmony.one' },
+    },
+};
+
+const harmonyTestnetChain: Chain = {
+    id: 1666700000,
+    name: 'Harmony Testnet',
+    network: 'harmony-testnet',
+    nativeCurrency: { name: 'Harmony', symbol: 'ONE', decimals: 18 },
+    rpcUrls: {
+        default: { http: ['https://api.s0.b.hmny.io'] },
+        public: { http: ['https://api.s0.b.hmny.io'] },
+    },
+    blockExplorers: {
+        default: { name: 'Harmony Explorer', url: 'https://explorer.harmony.one' },
+    },
+};
+
 export const networkDefinitions: Record<Network, INetworkDefinition> = {
     // Mainnets
     [Network.ETHEREUM_MAINNET]: {
@@ -298,6 +327,21 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
             conditionFactory: '0xdFc18C8Cd61f6cfD0A3B0aF0C0f9a752e2BF1515',
         },
     },
+    [Network.HARMONY_MAINNET]: {
+        ...harmonyChain,
+        name: 'Harmony',
+        logo: 'https://assets.coingecko.com/coins/images/4344/large/Y88JAze.png',
+        order: 11,
+        protocolVersion: latestProtocolVersion,
+        tenderlySupport: false,
+        addresses: {
+            dao: '0x0000000000000000000000000000000000000000',
+            daoFactory: '0x0000000000000000000000000000000000000000',
+            pluginSetupProcessor: '0x0000000000000000000000000000000000000000',
+            globalExecutor: '0x0000000000000000000000000000000000000000',
+            conditionFactory: '0x0000000000000000000000000000000000000000',
+        },
+    },
 
     // Testnets
     [Network.ETHEREUM_SEPOLIA]: {
@@ -336,6 +380,22 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
             pluginSetupProcessor: '0xe2Ef39f1be2269644cBfa9b70003A143bF1fdf4d',
             globalExecutor: '0x0ED69b3b690e10Fb509FA1b081C1b74EF3FeB36D',
             conditionFactory: '0x988B0e1542d5e9494897778ebc444E9FfDa58Ddb',
+        },
+    },
+    [Network.HARMONY_TESTNET]: {
+        ...harmonyTestnetChain,
+        name: 'Harmony Testnet',
+        logo: 'https://assets.coingecko.com/coins/images/4344/large/Y88JAze.png',
+        order: 13,
+        protocolVersion: latestProtocolVersion,
+        tenderlySupport: false,
+        beta: true,
+        addresses: {
+            dao: '0x0000000000000000000000000000000000000000',
+            daoFactory: '0x0000000000000000000000000000000000000000',
+            pluginSetupProcessor: '0x0000000000000000000000000000000000000000',
+            globalExecutor: '0x0000000000000000000000000000000000000000',
+            conditionFactory: '0x0000000000000000000000000000000000000000',
         },
     },
 };
