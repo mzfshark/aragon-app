@@ -25,6 +25,8 @@ export const tokenPlugin: IPluginInfo = {
         [Network.CHILIZ_MAINNET]: '0x62c82a443692A1bE4D0421b1E4678F0dff8F3c1B',
         [Network.AVAX_MAINNET]: '0xf56e330a183cABaC0b082b1a318F2c7ba66fe4d6',
         [Network.KATANA_MAINNET]: '0xBAFF9A7c3Bf3e791B3E601fFe5A05C7759f30E5b',
+        [Network.HARMONY_MAINNET]: '0x0000000000000000000000000000000000000000',
+        [Network.HARMONY_TESTNET]: '0x0000000000000000000000000000000000000000',
     },
     setup: {
         nameKey: 'app.plugins.token.meta.setup.name',

@@ -107,7 +107,6 @@ const latestProtocolVersion: IContractVersionInfo = {
 const harmonyChain: Chain = {
     id: 1666600000,
     name: 'Harmony',
-    network: 'harmony',
     nativeCurrency: { name: 'Harmony', symbol: 'ONE', decimals: 18 },
     rpcUrls: {
         default: { http: ['https://api.harmony.one'] },
@@ -121,7 +120,6 @@ const harmonyChain: Chain = {
 const harmonyTestnetChain: Chain = {
     id: 1666700000,
     name: 'Harmony Testnet',
-    network: 'harmony-testnet',
     nativeCurrency: { name: 'Harmony', symbol: 'ONE', decimals: 18 },
     rpcUrls: {
         default: { http: ['https://api.s0.b.hmny.io'] },
@@ -145,6 +143,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 1,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0x58C1F7Bc62Bb63fb137bc8F6d8ea6321a0501d29',
             daoFactory: '0x246503df057A9a85E0144b6867a828c99676128B',
@@ -164,6 +163,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 2,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0xDC5E714720797Fa0B453Bc9eF5049548C79031C3',
             daoFactory: '0x9BC7f1dc3cFAD56a0EcD924D1f9e70f5C7aF0039',
@@ -183,6 +183,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 3,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0xBeb2271224D22BdA388B513268873387E5BfC27f',
             daoFactory: '0xcc602EA573a42eBeC290f33F49D4A87177ebB8d2',
@@ -202,6 +203,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 4,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0xc3F1f4d3B4E24b6F019120205e12A01D733BEb55',
             daoFactory: '0x49e04AB7af7A263b8ac802c1cAe22f5b4E4577Cd',
@@ -221,6 +223,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 5,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0x42D24803D8697050CA59f6E306322eC9fce8D7e9',
             daoFactory: '0xB001Bd6A21056c2a7FB5A5b9005cf896b181e74d',
@@ -240,6 +243,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 6,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0x9b8B929b961C53168B0321540005bE7F1b47FD8c',
             daoFactory: '0xb393ED8e7ACDe6bC3d38a8d3548B99c152AaC912',
@@ -260,6 +264,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         protocolVersion: latestProtocolVersion,
         beta: false,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0xb8Be55076350164C62aE0CFB69560B0f0A9B8a33',
             daoFactory: '0xd59D2bEF6465cC71efEc40afd2D72901470Dd835',
@@ -279,6 +284,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 8,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0x9B43625b28fa32CaB68d84F1B46E2721DD70Ba42',
             daoFactory: '0x01019505E3B87340d7Fa69EF3E2510A7642f067A',
@@ -299,6 +305,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         protocolVersion: latestProtocolVersion,
         beta: true,
         tenderlySupport: false,
+        disabled: true,
         addresses: {
             dao: '0x221B2d4fF2dEf7Bb1Da68460760B299e4c2D8AdD',
             daoFactory: '0xdD68D6b46b887AcB795eCC3Fc7bb3fEf2Dfebf8f',
@@ -319,6 +326,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         protocolVersion: latestProtocolVersion,
         beta: true,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0xa8a4Dc9B6f16BEe4E527CEA47FBeb6e0802030e1',
             daoFactory: '0x35B62715459cB60bf6dC17fF8cfe138EA305E7Ee',
@@ -335,10 +343,10 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         protocolVersion: latestProtocolVersion,
         tenderlySupport: false,
         addresses: {
-            dao: '0x0000000000000000000000000000000000000000',
-            daoFactory: '0x0000000000000000000000000000000000000000',
-            pluginSetupProcessor: '0x0000000000000000000000000000000000000000',
-            globalExecutor: '0x0000000000000000000000000000000000000000',
+            dao: '0x53d062477A613a5D0c6e2757F3B14ACc743DfEc3',
+            daoFactory: '0xB34073eB1fF2525bD5e58b7f08C1ad927EBCFa69',
+            pluginSetupProcessor: '0x178f0886547c5dF9B906FaA9AEC96126580948a0',
+            globalExecutor: '0x4dfD18599539acFF5d63E2dfE8C8AAC44cD90E88',
             conditionFactory: '0x0000000000000000000000000000000000000000',
         },
     },
@@ -355,6 +363,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 0,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0x824d4AAD1cbF2327c4C429E3c97F968Ee19344F8',
             daoFactory: '0xB815791c233807D39b7430127975244B36C19C8e',
@@ -374,6 +383,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         order: 12,
         protocolVersion: latestProtocolVersion,
         tenderlySupport: true,
+        disabled: true,
         addresses: {
             dao: '0x39e836A6c32163733929B213965e3feC0007914a',
             daoFactory: '0xee321f16f7F0a0F0d8b850E70c4eAde4A288ECd7',
