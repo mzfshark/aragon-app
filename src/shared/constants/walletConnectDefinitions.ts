@@ -1,3 +1,7 @@
+const isLocal = process.env.NEXT_PUBLIC_ENV === 'local';
+const metadataUrl = isLocal ? 'http://localhost:3000' : 'https://governance.country';
+const metadataIcons = isLocal ? ['http://localhost:3000/icon.png'] : ['https://governance.country/icon.png'];
+
 export const walletConnectDefinitions = {
     // WalletConnect project ID.
     projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
@@ -6,7 +10,7 @@ export const walletConnectDefinitions = {
     metadata: {
         name: 'Governance Country',
         description: 'Governance Country',
-        url: 'https://governance.country',
-        icons: ['https://governance.country/icon.png'],
+        url: metadataUrl,
+        icons: metadataIcons,
     },
 };

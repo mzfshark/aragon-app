@@ -1,3 +1,5 @@
+"use client";
+
 import { useBlockNavigationContext } from '@/shared/components/blockNavigationContext';
 import { useTranslations } from '@/shared/components/translationsProvider';
 import classNames from 'classnames';

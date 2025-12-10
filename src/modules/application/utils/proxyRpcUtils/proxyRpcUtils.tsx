@@ -32,35 +32,9 @@ export class ProxyRpcUtils {
     constructor() {
         const isCI = process.env.CI === 'true';
 
-        const providerKeys: Partial<Record<RpcProvider, string>> = {};
-        const requiredProviders = new Set<RpcProvider>();
-
-        // Only require env keys for providers actually configured in networkDefinitions
-        for (const def of Object.values(networkDefinitions)) {
-            const cfg = def.privateRpcConfig;
-            if (cfg) {
-                requiredProviders.add(cfg.rpcProvider);
-            }
-        }
-
-        const missingProviders: RpcProvider[] = [];
-
-        for (const [provider, envVar] of Object.entries(RPC_PROVIDER_ENV_VARS) as Array<[RpcProvider, string]>) {
-            const key = process.env[envVar];
-            providerKeys[provider] = key;
-
-            if (!isCI && requiredProviders.has(provider) && !key) {
-                missingProviders.push(provider);
-            }
-        }
-
-        if (missingProviders.length > 0) {
-            const missingEnvVars = missingProviders.map((p) => RPC_PROVIDER_ENV_VARS[p]).join(', ');
-            throw new Error(
-                `ProxyRpcUtils: Missing RPC keys for providers: ${missingProviders.join(', ')}. ` +
-                    `Required env vars: ${missingEnvVars}`,
-            );
-        }
+        const requiredProviders = this.requiredProvidersFromDefinitions();
+        const { providerKeys, missingProviders } = this.gatherProviderKeys(requiredProviders, isCI);
+        this.handleMissingProviders(missingProviders);
 
         this.rpcKeyByProvider = providerKeys;
     }
@@ -75,56 +49,12 @@ export class ProxyRpcUtils {
             return NextResponse.json({ error: `Chain ${chainId} is not supported` }, { status: 501 });
         }
 
-        const monitoringContext = {
-            chainId,
-            rpcEndpoint,
-            requestMethod: request.method,
-            requestOptions,
-        };
+        const monitoringContext = this.buildMonitoringContext(chainId, rpcEndpoint, request.method, requestOptions);
 
         try {
             const result = await fetch(rpcEndpoint, requestOptions);
 
-            if (!result.ok) {
-                monitoringUtils.logError(new Error('RPC endpoint returned error status'), {
-                    context: {
-                        status: result.status,
-                        statusText: result.statusText,
-                        ...monitoringContext,
-                    },
-                });
-
-                return NextResponse.json(
-                    { error: `RPC request failed with status ${String(result.status)}` },
-                    { status: 500 },
-                );
-            }
-
-            // Forward no-content responses as-is without a body
-            if (result.status === 204 || result.status === 205 || result.status === 304) {
-                return new NextResponse(null, { status: result.status, headers: result.headers });
-            }
-
-            try {
-                const parsedResult = await responseUtils.safeJsonParseForResponse(result);
-
-                if (parsedResult == null) {
-                    return new NextResponse(null, { status: result.status, headers: result.headers });
-                }
-
-                return NextResponse.json(parsedResult);
-            } catch (jsonError) {
-                monitoringUtils.logError(jsonError, {
-                    context: {
-                        errorType: 'json_parse_error',
-                        status: result.status,
-                        statusText: result.statusText,
-                        ...monitoringContext,
-                    },
-                });
-
-                return NextResponse.json({ error: 'Invalid JSON response from RPC endpoint' }, { status: 500 });
-            }
+            return this.handleRpcResult(result, monitoringContext);
         } catch (fetchError) {
             monitoringUtils.logError(fetchError, {
                 context: {
@@ -134,6 +64,89 @@ export class ProxyRpcUtils {
             });
 
             return NextResponse.json({ error: 'Failed to connect to RPC endpoint' }, { status: 500 });
+        }
+    };
+
+    private requiredProvidersFromDefinitions = (): Set<RpcProvider> => {
+        const required = new Set<RpcProvider>();
+        for (const def of Object.values(networkDefinitions)) {
+            const cfg = def.privateRpcConfig;
+            if (cfg) required.add(cfg.rpcProvider);
+        }
+        return required;
+    };
+
+    private gatherProviderKeys = (
+        requiredProviders: Set<RpcProvider>,
+        isCI: boolean,
+    ): { providerKeys: Partial<Record<RpcProvider, string>>; missingProviders: RpcProvider[] } => {
+        const providerKeys: Partial<Record<RpcProvider, string>> = {};
+        const missingProviders: RpcProvider[] = [];
+
+        for (const [provider, envVar] of Object.entries(RPC_PROVIDER_ENV_VARS) as Array<[RpcProvider, string]>) {
+            const key = process.env[envVar];
+            providerKeys[provider] = key;
+            if (!isCI && requiredProviders.has(provider) && !key) missingProviders.push(provider);
+        }
+
+        return { providerKeys, missingProviders };
+    };
+
+    private handleMissingProviders = (missingProviders: RpcProvider[]) => {
+        if (missingProviders.length === 0) return;
+
+        const env = process.env.NEXT_PUBLIC_ENV ?? 'development';
+        const isProdLike = env === 'production' || env === 'staging';
+        const missingEnvVars = missingProviders.map((p) => RPC_PROVIDER_ENV_VARS[p]).join(', ');
+
+        if (isProdLike) {
+            throw new Error(
+                `ProxyRpcUtils: Missing RPC keys for providers: ${missingProviders.join(', ')}. Required env vars: ${missingEnvVars}`,
+            );
+        }
+
+        monitoringUtils.logError(
+            new Error(
+                `ProxyRpcUtils: Missing RPC keys in ${env}. Falling back to public RPC for providers: ${missingProviders.join(
+                    ', ',
+                )}. Required env vars: ${missingEnvVars}`,
+            ),
+        );
+    };
+
+    private buildMonitoringContext = (
+        chainId: string,
+        rpcEndpoint: string,
+        requestMethod: string,
+        requestOptions: RequestInit,
+    ) => ({ chainId, rpcEndpoint, requestMethod, requestOptions });
+
+    private handleRpcResult = async (result: Response, monitoringContext: any): Promise<NextResponse> => {
+        if (!result.ok) {
+            monitoringUtils.logError(new Error('RPC endpoint returned error status'), {
+                context: { status: result.status, statusText: result.statusText, ...monitoringContext },
+            });
+            return NextResponse.json(
+                { error: `RPC request failed with status ${String(result.status)}` },
+                { status: 500 },
+            );
+        }
+
+        if (result.status === 204 || result.status === 205 || result.status === 304) {
+            return new NextResponse(null, { status: result.status, headers: result.headers });
+        }
+
+        try {
+            const parsedResult = await responseUtils.safeJsonParseForResponse(result);
+            if (parsedResult == null) {
+                return new NextResponse(null, { status: result.status, headers: result.headers });
+            }
+            return NextResponse.json(parsedResult);
+        } catch (jsonError) {
+            monitoringUtils.logError(jsonError, {
+                context: { errorType: 'json_parse_error', status: result.status, statusText: result.statusText, ...monitoringContext },
+            });
+            return NextResponse.json({ error: 'Invalid JSON response from RPC endpoint' }, { status: 500 });
         }
     };
 
