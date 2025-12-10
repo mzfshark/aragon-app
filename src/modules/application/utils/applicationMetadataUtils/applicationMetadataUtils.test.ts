@@ -21,7 +21,7 @@ describe('applicationMetadata utils', () => {
                 params: Promise.resolve({ addressOrEns: 'test-dao-address', network: Network.ETHEREUM_SEPOLIA }),
             });
             expect(metadata.title).toEqual(dao.name);
-            expect(metadata.openGraph?.siteName).toEqual(`${dao.name} | Governed on Aragon`);
+            expect(metadata.openGraph?.siteName).toEqual(`${dao.name} | Governed on Harmony Community DAO`);
             expect(metadata.description).toEqual(dao.description);
         });
 

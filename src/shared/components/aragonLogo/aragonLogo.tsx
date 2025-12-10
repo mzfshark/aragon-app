@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import type { ComponentProps } from 'react';
-import { AragonLogoIcon } from './aragonLogoIcon';
-import { AragonLogoWithText } from './aragonLogoWithText';
+import { HarmonyLogoIcon } from './harmonyLogoIcon';
+import { HarmonyLogoWithTextCommunityDao } from './harmonyLogoWithTextCommunityDao';
 
 export type LogoVariant = 'primary' | 'white';
 export type LogoSize = 'sm' | 'md' | 'lg';
@@ -46,7 +46,7 @@ export const AragonLogo: React.FC<IAragonLogoProps> = (props) => {
     if (!responsiveIconOnly) {
         return (
             <div className={containerClasses} {...otherProps}>
-                {iconOnly ? <AragonLogoIcon /> : <AragonLogoWithText />}
+                {iconOnly ? <HarmonyLogoIcon /> : <HarmonyLogoWithTextCommunityDao />}
             </div>
         );
     }
@@ -55,11 +55,11 @@ export const AragonLogo: React.FC<IAragonLogoProps> = (props) => {
         <div className={containerClasses} {...otherProps}>
             {/* Show icon only on mobile, hide on larger screens */}
             <div className="block h-full w-auto md:hidden">
-                <AragonLogoIcon />
+                <HarmonyLogoIcon />
             </div>
             {/* Hide on mobile, show on larger screens */}
             <div className="hidden h-full w-auto md:block">
-                <AragonLogoWithText />
+                <HarmonyLogoWithTextCommunityDao />
             </div>
         </div>
     );

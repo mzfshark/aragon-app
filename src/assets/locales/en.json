@@ -99,7 +99,7 @@
       },
       "connectWalletDialog": {
         "a11y": {
-          "description": "Connect your wallet to Aragon",
+          "description": "Connect your wallet to Harmony",
           "title": "Connect wallet"
         },
         "action": {
@@ -118,7 +118,7 @@
         "title": "Debug"
       },
       "footer": {
-        "copyright": "© {{year}} Aragon",
+        "copyright": "© {{year}} Harmony",
         "governed": "Governed on",
         "link": {
           "build": "Build",
@@ -944,7 +944,7 @@
       "exploreDaosPage": {
         "doItYourself": {
           "actionLabel": "Developer portal",
-          "subtitle": "Build your own custom Aragon OSx DAO or your own web application using our Governance UI Kit and App Template.",
+          "subtitle": "Build your own custom Harmony OSx DAO or your own web application using our Governance UI Kit and App Template.",
           "title": "Do it yourself"
         },
         "enterpriseService": {
@@ -954,11 +954,11 @@
         },
         "hero": {
           "subtitle": "Explore the organizations using our modular governance stack to secure their onchain governance.",
-          "title": "Governed on Aragon"
+          "title": "Governed on Harmony"
         },
         "noCodeSetup": {
           "actionLabel": "Create a DAO",
-          "subtitle": "Easily deploy a new DAO on Aragon OSx in minutes with our simple, no-code deployment wizard.",
+          "subtitle": "Easily deploy a new DAO on Harmony OSx in minutes with our simple, no-code deployment wizard.",
           "title": "No-code setup"
         },
         "section": {
@@ -2602,7 +2602,7 @@
       "daoVersionInfo": {
         "governanceValue": "{{name}} v{{release}}.{{build}}",
         "osLabel": "Operating system",
-        "osValue": "Aragon OSx v{{version}}"
+        "osValue": "Harmony OSx v{{version}}"
       },
       "governanceProcessRequiredDialog": {
         "a11y": {
@@ -2662,7 +2662,7 @@
       },
       "updateDaoContracts": {
         "button": "Upgrade contracts",
-        "description": "There are updates available for Aragon OSx and its plugin contracts."
+        "description": "There are updates available for Harmony OSx and its plugin contracts."
       },
       "updateDaoContractsCard": {
         "releaseNotes": "Release notes",
@@ -2673,10 +2673,10 @@
           "cancel": "Cancel",
           "confirm": "Propose"
         },
-        "description": "New versions of the following contracts have been released by the Aragon team. To perform an upgrade, you will have to create a proposal and execute it.",
+        "description": "New versions of the following contracts have been released by the Harmony team. To perform an upgrade, you will have to create a proposal and execute it.",
         "osxUpdate": {
           "name": "Operating system",
-          "smartContractName": "Aragon OSx"
+          "smartContractName": "Harmony OSx"
         },
         "title": "Review contracts to upgrade"
       }
