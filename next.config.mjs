@@ -82,7 +82,7 @@ const nextConfig = {
         ];
     },
     async headers() {
-        return [
+        const headers = [
             // Security headers for all paths
             {
                 source: '/:path*',
@@ -109,6 +109,31 @@ const nextConfig = {
                 ],
             },
         ];
+
+        // In development, relax CSP to allow Webpack's eval and inline scripts used by dev overlay
+        if (process.env.NODE_ENV !== 'production') {
+            const devCsp = [
+                "default-src 'self'",
+                // Allow eval/inline for Next.js + Webpack dev and overlay
+                "script-src 'self' 'unsafe-eval' 'unsafe-inline' https: https://vercel.live",
+                // Styles from self and inline (Tailwind injects styles in dev)
+                "style-src 'self' 'unsafe-inline' https:",
+                // Allow images and data URIs in dev
+                "img-src * data: blob:",
+                // Allow all connections for HMR, WalletConnect, APIs during dev
+                "connect-src *",
+                // Fonts and frames commonly used by libs
+                "font-src 'self' https: data:",
+                "frame-src *",
+            ].join('; ');
+
+            headers.unshift({
+                source: '/:path*',
+                headers: [{ key: 'Content-Security-Policy', value: devCsp }],
+            });
+        }
+
+        return headers;
     },
     images: {
         remotePatterns: [
