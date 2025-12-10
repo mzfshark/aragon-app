@@ -19,6 +19,7 @@ class MiddlewareUtils {
     private getContentSecurityPolicies = (nonce: string, env: string): string[] => {
         const isProd = env === 'production' || env === 'staging';
         const isLocal = env === 'local';
+        const isDev = env === 'development' || env === 'preview';
 
         // List of hosts to allow to embed the App in an `iframe`. For now, we
         // only have Common Ground app as a one-off experiment. If we get more
@@ -26,7 +27,8 @@ class MiddlewareUtils {
         const allowedInFrameHosts = ['https://app.cg'];
         const allowedInFrameHostsNonProd = ['https://vercel.live'];
 
-        const scriptSrc = isProd ? `'strict-dynamic'` : isLocal ? `'unsafe-eval'` : 'https://vercel.live';
+        // In non-prod, allow inline/eval to avoid blocking dev tooling and third-party inline snippets
+        const scriptSrc = isProd ? `'strict-dynamic'` : (isLocal || isDev) ? `'unsafe-eval' 'unsafe-inline'` : 'https://vercel.live';
         const frameSrc = isProd
             ? allowedInFrameHosts.join(' ')
             : [...allowedInFrameHosts, ...allowedInFrameHostsNonProd].join(' ');
