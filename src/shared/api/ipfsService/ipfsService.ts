@@ -1,7 +1,15 @@
 import { HttpService } from '../httpService';
 
 class IpfsService extends HttpService {
-    jwt = process.env.NEXT_SECRET_IPFS_JWT!;
+    get jwt() {
+        const jwt = process.env.NEXT_SECRET_IPFS_JWT;
+        if (!jwt) {
+            throw new Error(
+                'IPFS JWT não configurado. Defina NEXT_SECRET_IPFS_JWT no .env.local (Pinata JWT).',
+            );
+        }
+        return jwt;
+    }
 
     urls = {
         pinJson: '/pinning/pinJSONToIPFS',
