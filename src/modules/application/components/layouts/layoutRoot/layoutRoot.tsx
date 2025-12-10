@@ -15,6 +15,7 @@ import { DebugPanel } from '../../debugPanel';
 import { ErrorBoundary } from '../../errorBoundary';
 import { Footer } from '../../footer';
 import { Providers } from '../../providers';
+import { Header } from '../../header/header';
 import './layoutRoot.css';
 
 export interface ILayoutRootProps {
@@ -62,6 +63,7 @@ export const LayoutRoot: React.FC<ILayoutRootProps> = async (props) => {
                     featureFlagsSnapshot={featureFlagsSnapshot}
                 >
                     <ErrorBoundary>
+                        <Header />
                         <div className="flex grow flex-col">{children}</div>
                         {isDebugPanelEnabled && <DebugPanel />}
                     </ErrorBoundary>

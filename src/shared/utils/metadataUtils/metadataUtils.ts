@@ -26,14 +26,13 @@ export interface IBuildMetadataParams {
 }
 
 class MetadataUtils {
-    public baseUrl = 'https://app.aragon.org';
+    public baseUrl = 'https://governance.country';
 
-    private defaultTitle = 'Governed on Aragon';
+    private defaultTitle = 'Governed on Governance Country';
     private defaultDescription =
         'Explore the organizations using our modular governance stack to secure their onchain governance.';
     private defaultImage = '/og-share-large.png';
-    private defaultSiteName = 'Aragon';
-
+    private defaultSiteName = 'Governance Country';
     private authors = [{ name: this.defaultSiteName, url: this.baseUrl }];
 
     getDefaultMetadata = (): Metadata => ({
@@ -47,11 +46,11 @@ class MetadataUtils {
             title: this.defaultTitle,
             description: this.defaultDescription,
             siteName: this.defaultSiteName,
-            images: [{ url: this.defaultImage, width: 1200, height: 630, alt: 'Aragon Logo' }],
+            images: [{ url: this.defaultImage, width: 1200, height: 630, alt: 'Governance Country Logo' }],
         },
         twitter: {
             card: 'summary_large_image',
-            site: '@aragonproject',
+            site: '@governancecountry',
             title: this.defaultTitle,
             description: this.defaultDescription,
             images: [this.defaultImage],
@@ -66,7 +65,7 @@ class MetadataUtils {
             title,
             description,
             openGraph: { title, description, siteName, type, images: imageArray },
-            twitter: { card: 'summary', site: '@aragonproject', title, description, images: imageArray },
+            twitter: { card: 'summary', site: '@governancecountry', title, description, images: imageArray },
         };
     };
 }

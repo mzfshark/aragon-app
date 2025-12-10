@@ -15,4 +15,49 @@
   --guk-dialog-alert-content-z-index: 30;
 
   --guk-dropdown-container-content-z-index: 40;
+
+  /* Harmony brand theme tokens */
+  --color-primary-50: #e6fbf7;
+  --color-primary-100: #c1f6ec;
+  --color-primary-200: #99f1e1;
+  --color-primary-300: #6fead4;
+  --color-primary-400: #00b5ad; /* Harmony teal */
+  --color-primary-500: #009c94;
+  --color-primary-600: #00837c;
+  --color-primary-700: #006b64;
+  --color-primary-800: #00534d;
+  --color-primary-900: #003b35;
+
+  --color-accent-400: #6fead4; /* Soft accent */
+  --color-neutral-50: #f7faf9;
+  --color-neutral-100: #eef4f3;
+  --color-neutral-200: #dfe8e7;
+  --color-neutral-900: #0d1b1a;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-soft: 0 1px 3px rgba(0, 53, 245, 0.06), 0 1px 2px -1px rgba(0, 53, 245, 0.06);
+}
+
+/* Apply Harmony theme to basic elements */
+body {
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-900);
+}
+
+a {
+  color: var(--color-primary-500);
+}
+
+.btn-primary {
+  background-color: var(--color-primary-400);
+  color: white;
+  border-radius: var(--radius-md);
+}
+
+.card {
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
 }
