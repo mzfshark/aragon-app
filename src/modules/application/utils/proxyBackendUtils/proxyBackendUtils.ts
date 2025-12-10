@@ -51,8 +51,26 @@ export class ProxyBackendUtils {
                 'ARAGON_BACKEND_URL não configurada. Defina no ambiente do servidor para habilitar o proxy /api/backend.',
             );
         }
+        // Validate protocol; if missing, try to prefix http:// to avoid ERR_INVALID_URL in dev
+        let normalizedBase = baseUrl;
+        try {
+            // Will throw if protocol is missing/invalid
+            // eslint-disable-next-line no-new
+            new URL(baseUrl);
+        } catch {
+            const candidate = `http://${baseUrl}`;
+            try {
+                // eslint-disable-next-line no-new
+                new URL(candidate);
+                normalizedBase = candidate;
+            } catch {
+                throw new Error(
+                    `ARAGON_BACKEND_URL inválida: "${baseUrl}". Use uma URL completa com protocolo, ex.: https://api.governance.country`,
+                );
+            }
+        }
 
-        const url = `${baseUrl}${relativeUrl}`;
+        const url = `${normalizedBase}${relativeUrl}`;
 
         return url;
     };
