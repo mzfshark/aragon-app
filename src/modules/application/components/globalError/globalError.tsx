@@ -1,6 +1,7 @@
 'use client';
 
 import { ErrorFeedback } from '@/shared/components/errorFeedback';
+import { TranslationsProvider } from '@/shared/components/translationsProvider';
 import { monitoringUtils } from '@/shared/utils/monitoringUtils';
 import { useEffect } from 'react';
 
@@ -21,7 +22,10 @@ export const GlobalError: React.FC<IGlobalErrorProps> = (props) => {
     return (
         <html lang="en">
             <body>
-                <ErrorFeedback />
+                {/* Render with a minimal translations provider to avoid hook error */}
+                <TranslationsProvider translations={{} as any}>
+                    <ErrorFeedback />
+                </TranslationsProvider>
             </body>
         </html>
     );
