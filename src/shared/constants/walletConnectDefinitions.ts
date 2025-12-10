@@ -8,8 +8,8 @@ export const walletConnectDefinitions = {
 
     // Metadata used during the wallet connection flow and the dApp connect feature.
     metadata: {
-        name: 'Governance Country',
-        description: 'Governance Country',
+        name: 'Community DAO',
+        description: 'Community DAO',
         url: metadataUrl,
         icons: metadataIcons,
     },

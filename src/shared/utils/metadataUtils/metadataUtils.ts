@@ -28,11 +28,11 @@ export interface IBuildMetadataParams {
 class MetadataUtils {
     public baseUrl = 'https://governance.country';
 
-    private defaultTitle = 'Governed on Governance Country';
+    private defaultTitle = 'Governed on Community DAO';
     private defaultDescription =
         'Explore the organizations using our modular governance stack to secure their onchain governance.';
     private defaultImage = '/og-share-large.png';
-    private defaultSiteName = 'Governance Country';
+    private defaultSiteName = 'Community DAO';
     private authors = [{ name: this.defaultSiteName, url: this.baseUrl }];
 
     getDefaultMetadata = (): Metadata => ({
@@ -46,7 +46,7 @@ class MetadataUtils {
             title: this.defaultTitle,
             description: this.defaultDescription,
             siteName: this.defaultSiteName,
-            images: [{ url: this.defaultImage, width: 1200, height: 630, alt: 'Governance Country Logo' }],
+            images: [{ url: this.defaultImage, width: 1200, height: 630, alt: 'Community DAO Logo' }],
         },
         twitter: {
             card: 'summary_large_image',
