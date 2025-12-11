@@ -39,7 +39,7 @@ class ApplicationMetadataUtils {
             const image = ipfsUtils.cidToSrc(dao.avatar);
             const title = dao.name;
             const description = dao.description;
-            const siteName = `${dao.name} | Governed on Harmony Community DAO`;
+            const siteName = `${dao.name} | Governed on Harmony DAO`;
 
             return metadataUtils.buildMetadata({ title, description, siteName, image });
         } catch (error: unknown) {

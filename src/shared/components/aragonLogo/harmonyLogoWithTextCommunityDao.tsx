@@ -1,5 +1,5 @@
 export const HarmonyLogoWithTextCommunityDao = () => (
-    <div className="inline-flex items-center h-full w-auto" aria-label="Harmony Community DAO logo">
+    <div className="inline-flex items-center h-full w-auto" aria-label="Harmony logo">
         <svg
             viewBox="0 0 32 32"
             fill="none"
@@ -9,6 +9,6 @@ export const HarmonyLogoWithTextCommunityDao = () => (
         >
             <image href="/static/media/harmony-logo.png" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" />
         </svg>
-        <span className="ml-2 select-none">Harmony Community DAO</span>
+        <span className="ml-2 select-none">Harmony DAO</span>
     </div>
 );

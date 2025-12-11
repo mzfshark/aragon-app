@@ -31,7 +31,7 @@ class GovernanceMetadataUtils {
             const title = `${proposalSlug}: ${proposal.title}`;
             const description = proposal.summary;
             const dao = await daoService.getDao({ urlParams: { id: daoId } });
-            const siteName = `${dao.name} | Governed on Harmony Community DAO`;
+            const siteName = `${dao.name} | Governed on Harmony DAO`;
             const image = ipfsUtils.cidToSrc(dao.avatar);
 
             return metadataUtils.buildMetadata({
