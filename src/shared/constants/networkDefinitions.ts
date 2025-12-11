@@ -344,7 +344,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         tenderlySupport: false,
         addresses: {
             dao: '0x53d062477A613a5D0c6e2757F3B14ACc743DfEc3',
-            daoFactory: '0xB34073eB1fF2525bD5e58b7f08C1ad927EBCFa69',
+            daoFactory: '0xA6B240EF1A590522077148eF7AEd57d7D5F24a53',
             pluginSetupProcessor: '0x178f0886547c5dF9B906FaA9AEC96126580948a0',
             globalExecutor: '0x4dfD18599539acFF5d63E2dfE8C8AAC44cD90E88',
             conditionFactory: '0x7992fbe76bD9B007AB165Af04Be09BC0F6C89aF6',
