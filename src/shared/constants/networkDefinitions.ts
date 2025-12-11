@@ -126,7 +126,7 @@ const harmonyTestnetChain: Chain = {
         public: { http: ['https://api.s0.b.hmny.io'] },
     },
     blockExplorers: {
-        default: { name: 'Harmony Explorer', url: 'https://explorer.harmony.one' },
+        default: { name: 'Harmony Explorer', url: 'https://explorer.testnet.harmony.one' },
     },
 };
 
@@ -347,7 +347,7 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
             daoFactory: '0xB34073eB1fF2525bD5e58b7f08C1ad927EBCFa69',
             pluginSetupProcessor: '0x178f0886547c5dF9B906FaA9AEC96126580948a0',
             globalExecutor: '0x4dfD18599539acFF5d63E2dfE8C8AAC44cD90E88',
-            conditionFactory: '0x0000000000000000000000000000000000000000',
+            conditionFactory: '0x7992fbe76bD9B007AB165Af04Be09BC0F6C89aF6',
         },
     },
 
