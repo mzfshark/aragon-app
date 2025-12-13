@@ -343,9 +343,13 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         protocolVersion: latestProtocolVersion,
         tenderlySupport: false,
         addresses: {
+            // NOTE: 'dao' should point to the base DAO implementation, not an instance proxy.
+            // Keep current until the implementation address is confirmed for Harmony.
             dao: '0x53d062477A613a5D0c6e2757F3B14ACc743DfEc3',
-            daoFactory: '0xA6B240EF1A590522077148eF7AEd57d7D5F24a53',
-            pluginSetupProcessor: '0x178f0886547c5dF9B906FaA9AEC96126580948a0',
+            // Updated from deployed_contracts.json (Harmony): DAOFactory
+            daoFactory: '0x7390c1FF3a3Cb27ADB7CefDdB10B43e100012cB6',
+            // Updated from deployed_contracts.json (Harmony): PluginSetupProcessor
+            pluginSetupProcessor: '0x317eb5Ae9DE69387661f6c250913ADA0066dff1D',
             globalExecutor: '0x4dfD18599539acFF5d63E2dfE8C8AAC44cD90E88',
             conditionFactory: '0x7992fbe76bD9B007AB165Af04Be09BC0F6C89aF6',
         },
