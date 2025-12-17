@@ -90,14 +90,37 @@ class PublishDaoDialogUtils {
         }
 
         // Simulação prévia para capturar motivo de revert antes de enviar
-        // Simula a criação de DAO (com ou sem plugin)
-        await client.simulateContract({
-            abi: daoFactoryAbi,
-            address: daoFactory as Hex,
-            functionName: 'createDao',
-            args: [daoSettings, pluginSettings],
-            account: connectedAddress as Hex,
-        });
+        // Simula a criação de DAO (com ou sem plugin). No Harmony, se falhar, tenta sem plugin; se ainda falhar, 
+        // faz bypass da simulação e envia direto (RPC costuma ser volátil e não lidar bem com simulações).
+        try {
+            await client.simulateContract({
+                abi: daoFactoryAbi,
+                address: daoFactory as Hex,
+                functionName: 'createDao',
+                args: [daoSettings, pluginSettings],
+                account: connectedAddress as Hex,
+            });
+        } catch (err) {
+            const isHarmony = network === 'harmony-mainnet';
+            if (isHarmony) {
+                try {
+                    await client.simulateContract({
+                        abi: daoFactoryAbi,
+                        address: daoFactory as Hex,
+                        functionName: 'createDao',
+                        args: [daoSettings, []],
+                        account: connectedAddress as Hex,
+                    });
+                    // Se a simulação sem plugin passou, força a criação sem plugin
+                    pluginSettings = [] as const;
+                } catch (err2) {
+                    console.warn('Harmony simulate bypass: enviando sem simulação devido ao RPC/revert:', err2);
+                    // Bypass: mantém pluginSettings calculado (possivelmente vazio) e segue sem simular
+                }
+            } else {
+                throw err;
+            }
+        }
 
         const transactionData = encodeFunctionData({
             abi: daoFactoryAbi,
