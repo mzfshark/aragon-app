@@ -1,4 +1,5 @@
 import { GovernanceSlotId } from '@/modules/governance/constants/moduleSlots';
+import { CreateDaoSlotId } from '@/modules/createDao/constants/moduleSlots';
 import { SettingsSlotId } from '@/modules/settings/constants/moduleSlots';
 import { useAdminPermissionCheckProposalCreation } from '@/plugins/adminPlugin/hooks/useAdminPermissionCheckProposalCreation';
 import { pluginRegistryUtils } from '@/shared/utils/pluginRegistryUtils';
@@ -10,6 +11,7 @@ import { useAdminGovernanceSettings } from './hooks/useAdminGovernanceSettings';
 import { adminPluginUtils } from './utils/adminPluginUtils';
 import { adminProposalUtils } from './utils/adminProposalUtils';
 import { adminTransactionUtils } from './utils/adminTransactionUtils';
+import { buildAdminPrepareInstallTransaction } from './utils/adminPluginUtils/buildPrepareInstallTransaction';
 
 export const initialiseAdminPlugin = () => {
     pluginRegistryUtils
@@ -41,6 +43,13 @@ export const initialiseAdminPlugin = () => {
             slotId: GovernanceSlotId.GOVERNANCE_EXECUTE_CHECK_VERSION_SUPPORTED,
             pluginId: adminPlugin.id,
             function: adminPluginUtils.hasExecuteProposalPermissionModifier,
+        })
+
+        // Create DAO slots
+        .registerSlotFunction({
+            slotId: CreateDaoSlotId.CREATE_DAO_BUILD_PREPARE_PLUGIN_INSTALL_DATA,
+            pluginId: adminPlugin.id,
+            function: buildAdminPrepareInstallTransaction,
         })
 
         // Settings module slots
