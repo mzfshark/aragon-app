@@ -65,24 +65,25 @@ class PublishDaoDialogUtils {
         }
 
         const daoSettings = this.buildDaoSettingsParams(metadataCid, ens);
-        const pluginSettings = this.buildPluginSettingsParams(adminPluginRepo, connectedAddress);
+        // Tenta localizar uma versão válida do Admin para a rede
+        const pluginSettings = await this.findValidAdminPluginSettings(
+            network,
+            adminPluginRepo,
+            connectedAddress,
+            daoFactory as Hex,
+            daoSettings,
+        );
 
         // Simulação prévia para capturar motivo de revert antes de enviar
         const client = getPublicClient(network);
-        try {
-            await client.simulateContract({
-                abi: daoFactoryAbi,
-                address: daoFactory as Hex,
-                functionName: 'createDao',
-                args: [daoSettings, pluginSettings],
-                account: connectedAddress as Hex,
-            });
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : String(err);
-            throw new Error(
-                `Falha na simulação de criação do DAO em ${network}: ${message}. Verifique se o Admin PluginRepo possui a versão publicada para esta rede e se os endereços em networkDefinitions estão corretos.`,
-            );
-        }
+        // Simula com a versão encontrada
+        await client.simulateContract({
+            abi: daoFactoryAbi,
+            address: daoFactory as Hex,
+            functionName: 'createDao',
+            args: [daoSettings, pluginSettings],
+            account: connectedAddress as Hex,
+        });
 
         const transactionData = encodeFunctionData({
             abi: daoFactoryAbi,
@@ -121,17 +122,15 @@ class PublishDaoDialogUtils {
         return createDaoParams;
     };
 
-    private buildPluginSettingsParams = (adminPluginRepo: Hex, connectedAddress: string) => {
+    private buildPluginSettingsParams = (
+        adminPluginRepo: Hex,
+        connectedAddress: string,
+        versionTag: { release: number; build: number },
+    ) => {
         const pluginSettingsData = encodeAbiParameters(adminPluginSetupAbi, [
             connectedAddress as Hex,
             { target: zeroAddress, operation: 0 },
         ]);
-
-        // Normalize versionTag to the minimal ABI shape expected: { release, build }
-        const versionTag: { release: number; build: number } = {
-            release: adminPlugin.installVersion.release,
-            build: adminPlugin.installVersion.build,
-        };
 
         const pluginSettingsParams = {
             pluginSetupRef: {
@@ -142,6 +141,45 @@ class PublishDaoDialogUtils {
         } as const;
 
         return [pluginSettingsParams] as const;
+    };
+
+    private findValidAdminPluginSettings = async (
+        network: ICreateDaoFormData['network'],
+        adminPluginRepo: Hex,
+        connectedAddress: string,
+        daoFactory: Hex,
+        daoSettings: ReturnType<PublishDaoDialogUtils['buildDaoSettingsParams']>,
+    ) => {
+        const candidates: { release: number; build: number }[] = [
+            { release: adminPlugin.installVersion.release, build: adminPlugin.installVersion.build },
+            { release: 1, build: 2 },
+            { release: 1, build: 1 },
+        ];
+
+        const client = getPublicClient(network);
+        const errors: string[] = [];
+
+        for (const tag of candidates) {
+            const pluginSettings = this.buildPluginSettingsParams(adminPluginRepo, connectedAddress, tag);
+            try {
+                await client.simulateContract({
+                    abi: daoFactoryAbi,
+                    address: daoFactory,
+                    functionName: 'createDao',
+                    args: [daoSettings, pluginSettings],
+                    account: connectedAddress as Hex,
+                });
+                return pluginSettings;
+            } catch (err: unknown) {
+                errors.push(err instanceof Error ? err.message : String(err));
+            }
+        }
+
+        throw new Error(
+            `Não foi possível preparar a transação de criação do DAO. Tentativas de versão: ${candidates
+                .map((c) => `${c.release}.${c.build}`)
+                .join(', ')}. Erros: ${errors.join(' | ')}`,
+        );
     };
 }
 
