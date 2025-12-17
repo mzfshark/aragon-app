@@ -127,15 +127,21 @@ class PublishDaoDialogUtils {
             { target: zeroAddress, operation: 0 },
         ]);
 
-        const pluginSettingsParams = {
-            pluginSetupRef: {
-                pluginSetupRepo: adminPluginRepo,
-                versionTag: adminPlugin.installVersion,
-            },
-            data: pluginSettingsData,
+        // Normalize versionTag to the minimal ABI shape expected: { release, build }
+        const versionTag: { release: number; build: number } = {
+            release: adminPlugin.installVersion.release,
+            build: adminPlugin.installVersion.build,
         };
 
-        return [pluginSettingsParams];
+        const pluginSettingsParams = {
+            pluginSetupRef: {
+                pluginSetupRepo: adminPluginRepo as Hex,
+                versionTag,
+            },
+            data: pluginSettingsData,
+        } as const;
+
+        return [pluginSettingsParams] as const;
     };
 }
 
