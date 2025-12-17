@@ -154,10 +154,19 @@ class PublishDaoDialogUtils {
             { release: adminPlugin.installVersion.release, build: adminPlugin.installVersion.build },
             { release: 1, build: 2 },
             { release: 1, build: 1 },
+            { release: 1, build: 0 },
         ];
 
         const client = getPublicClient(network);
         const errors: string[] = [];
+
+        // Verifica se o PluginRepo existe na rede (código implantado)
+        const repoCode = await client.getCode({ address: adminPluginRepo });
+        if (!repoCode || repoCode === '0x') {
+            throw new Error(
+                `O endereço do Admin PluginRepo (${adminPluginRepo}) não possui código na rede ${network}. Verifique se foi implantado via PluginRepoFactory e atualize o mapeamento/endereço.`,
+            );
+        }
 
         for (const tag of candidates) {
             const pluginSettings = this.buildPluginSettingsParams(adminPluginRepo, connectedAddress, tag);
