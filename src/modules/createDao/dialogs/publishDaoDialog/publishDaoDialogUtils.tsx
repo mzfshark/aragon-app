@@ -2,6 +2,7 @@ import { adminPlugin } from '@/plugins/adminPlugin/constants/adminPlugin';
 import { networkDefinitions } from '@/shared/constants/networkDefinitions';
 import { ipfsUtils } from '@/shared/utils/ipfsUtils';
 import { transactionUtils, type ITransactionRequest } from '@/shared/utils/transactionUtils';
+import { getPublicClient } from '@/shared/utils/networkUtils/publicClient';
 import {
     encodeAbiParameters,
     encodeFunctionData,
@@ -43,7 +44,7 @@ class PublishDaoDialogUtils {
         };
     };
 
-    buildTransaction = (params: IBuildTransactionParams): Promise<ITransactionRequest> => {
+    buildTransaction = async (params: IBuildTransactionParams): Promise<ITransactionRequest> => {
         const { values, metadataCid, connectedAddress } = params;
         const { network, ens } = values;
 
@@ -66,6 +67,23 @@ class PublishDaoDialogUtils {
         const daoSettings = this.buildDaoSettingsParams(metadataCid, ens);
         const pluginSettings = this.buildPluginSettingsParams(adminPluginRepo, connectedAddress);
 
+        // Simulação prévia para capturar motivo de revert antes de enviar
+        const client = getPublicClient(network);
+        try {
+            await client.simulateContract({
+                abi: daoFactoryAbi,
+                address: daoFactory as Hex,
+                functionName: 'createDao',
+                args: [daoSettings, pluginSettings],
+                account: connectedAddress as Hex,
+            });
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            throw new Error(
+                `Falha na simulação de criação do DAO em ${network}: ${message}. Verifique se o Admin PluginRepo possui a versão publicada para esta rede e se os endereços em networkDefinitions estão corretos.`,
+            );
+        }
+
         const transactionData = encodeFunctionData({
             abi: daoFactoryAbi,
             functionName: 'createDao',
@@ -74,7 +92,7 @@ class PublishDaoDialogUtils {
 
         const transaction = { to: daoFactory, data: transactionData, value: BigInt(0) };
 
-        return Promise.resolve(transaction);
+        return transaction;
     };
 
     getDaoAddress = (receipt: TransactionReceipt) => {
