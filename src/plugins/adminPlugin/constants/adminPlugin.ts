@@ -7,8 +7,8 @@ export const adminPlugin: IPluginInfo = {
     name: 'Admin',
     installVersion: {
         release: 1,
-        build: 1,
-        releaseNotes: 'https://github.com/aragon/admin-plugin/releases/tag/v1.1.0',
+        build: 2,
+        releaseNotes: 'https://github.com/aragon/admin-plugin/releases/tag/v1.2.0',
         description:
             'This optional upgrade adds minor extensions to the contract interfaces to ensure consistency with other plugins.',
     },
