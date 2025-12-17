@@ -58,25 +58,39 @@ class PublishDaoDialogUtils {
                 `DAOFactory address not configured for network ${network}. Please set it in networkDefinitions.addresses.daoFactory.`,
             );
         }
-        if (!adminPluginRepo || adminPluginRepo.toLowerCase() === ZERO) {
-            throw new Error(
-                `Admin plugin repository is not configured for network ${network}. Update adminPlugin.repositoryAddresses to a valid repo address.`,
-            );
-        }
+        // Nota: Se o Admin repo não estiver configurado/implantado, prosseguimos sem instalar plugin
 
         const daoSettings = this.buildDaoSettingsParams(metadataCid, ens);
-        // Tenta localizar uma versão válida do Admin para a rede
-        const pluginSettings = await this.findValidAdminPluginSettings(
-            network,
-            adminPluginRepo,
-            connectedAddress,
-            daoFactory as Hex,
-            daoSettings,
-        );
+        const client = getPublicClient(network);
+
+        // Resolve plugin settings: tenta instalar Admin; se repo inválido/sem versão, envia vazio
+        let pluginSettings: readonly {
+            pluginSetupRef: { pluginSetupRepo: Hex; versionTag: { release: number; build: number } };
+            data: Hex;
+        }[] = [] as const;
+
+        if (adminPluginRepo && adminPluginRepo.toLowerCase() !== ZERO) {
+            const repoCode = await client.getCode({ address: adminPluginRepo as Hex });
+            const hasRepo = !!repoCode && repoCode !== '0x';
+            if (hasRepo) {
+                try {
+                    pluginSettings = await this.findValidAdminPluginSettings(
+                        network,
+                        adminPluginRepo as Hex,
+                        connectedAddress,
+                        daoFactory as Hex,
+                        daoSettings,
+                    );
+                } catch (err) {
+                    // fallback: prossegue sem instalar plugin
+                    console.warn('Admin plugin install skipped:', err);
+                    pluginSettings = [] as const;
+                }
+            }
+        }
 
         // Simulação prévia para capturar motivo de revert antes de enviar
-        const client = getPublicClient(network);
-        // Simula com a versão encontrada
+        // Simula a criação de DAO (com ou sem plugin)
         await client.simulateContract({
             abi: daoFactoryAbi,
             address: daoFactory as Hex,
