@@ -50,6 +50,19 @@ class PublishDaoDialogUtils {
         const { daoFactory } = networkDefinitions[network].addresses;
         const adminPluginRepo = adminPlugin.repositoryAddresses[network];
 
+        // Basic safety checks to avoid sending failing transactions
+        const ZERO = '0x0000000000000000000000000000000000000000' as const;
+        if (!daoFactory || daoFactory.toLowerCase() === ZERO) {
+            throw new Error(
+                `DAOFactory address not configured for network ${network}. Please set it in networkDefinitions.addresses.daoFactory.`,
+            );
+        }
+        if (!adminPluginRepo || adminPluginRepo.toLowerCase() === ZERO) {
+            throw new Error(
+                `Admin plugin repository is not configured for network ${network}. Update adminPlugin.repositoryAddresses to a valid repo address.`,
+            );
+        }
+
         const daoSettings = this.buildDaoSettingsParams(metadataCid, ens);
         const pluginSettings = this.buildPluginSettingsParams(adminPluginRepo, connectedAddress);
 
