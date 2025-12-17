@@ -140,10 +140,11 @@ class PublishDaoDialogUtils {
         adminPluginRepo: Hex,
         connectedAddress: string,
         versionTag: { release: number; build: number },
+        target: Hex,
     ) => {
         const pluginSettingsData = encodeAbiParameters(adminPluginSetupAbi, [
             connectedAddress as Hex,
-            { target: zeroAddress, operation: 0 },
+            { target, operation: 0 },
         ]);
 
         const pluginSettingsParams = {
@@ -157,6 +158,35 @@ class PublishDaoDialogUtils {
         return [pluginSettingsParams] as const;
     };
 
+    private getAdminVersionCandidates = (network: ICreateDaoFormData['network']) => {
+        const isHarmony = network === 'harmony-mainnet';
+        return isHarmony
+            ? [
+                  { release: 1, build: 1 },
+                  { release: 1, build: 2 },
+                  { release: 1, build: 0 },
+              ]
+            : [
+                  { release: adminPlugin.installVersion.release, build: adminPlugin.installVersion.build },
+                  { release: 1, build: 2 },
+                  { release: 1, build: 1 },
+                  { release: 1, build: 0 },
+              ];
+    };
+
+    private async ensureRepoExists(
+        network: ICreateDaoFormData['network'],
+        adminPluginRepo: Hex,
+    ): Promise<void> {
+        const client = getPublicClient(network);
+        const repoCode = await client.getCode({ address: adminPluginRepo });
+        if (!repoCode || repoCode === '0x') {
+            throw new Error(
+                `O endereço do Admin PluginRepo (${adminPluginRepo}) não possui código na rede ${network}. Verifique se foi implantado via PluginRepoFactory e atualize o mapeamento/endereço.`,
+            );
+        }
+    }
+
     private findValidAdminPluginSettings = async (
         network: ICreateDaoFormData['network'],
         adminPluginRepo: Hex,
@@ -164,28 +194,19 @@ class PublishDaoDialogUtils {
         daoFactory: Hex,
         daoSettings: ReturnType<PublishDaoDialogUtils['buildDaoSettingsParams']>,
     ) => {
-        const candidates: { release: number; build: number }[] = [
-            { release: adminPlugin.installVersion.release, build: adminPlugin.installVersion.build },
-            { release: 1, build: 2 },
-            { release: 1, build: 1 },
-            { release: 1, build: 0 },
-        ];
-
-        const client = getPublicClient(network);
+        const candidates = this.getAdminVersionCandidates(network);
         const errors: string[] = [];
 
-        // Verifica se o PluginRepo existe na rede (código implantado)
-        const repoCode = await client.getCode({ address: adminPluginRepo });
-        if (!repoCode || repoCode === '0x') {
-            throw new Error(
-                `O endereço do Admin PluginRepo (${adminPluginRepo}) não possui código na rede ${network}. Verifique se foi implantado via PluginRepoFactory e atualize o mapeamento/endereço.`,
-            );
-        }
+        await this.ensureRepoExists(network, adminPluginRepo);
+
+        // Define um target válido (não-zero) para a configuração do plugin
+        const { globalExecutor } = networkDefinitions[network].addresses;
+        const target = (globalExecutor || daoFactory) as Hex;
 
         for (const tag of candidates) {
-            const pluginSettings = this.buildPluginSettingsParams(adminPluginRepo, connectedAddress, tag);
+            const pluginSettings = this.buildPluginSettingsParams(adminPluginRepo, connectedAddress, tag, target);
             try {
-                await client.simulateContract({
+                await getPublicClient(network).simulateContract({
                     abi: daoFactoryAbi,
                     address: daoFactory,
                     functionName: 'createDao',
