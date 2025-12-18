@@ -345,10 +345,10 @@ export const networkDefinitions: Record<Network, INetworkDefinition> = {
         addresses: {
             // NOTE: 'dao' should point to the base DAO implementation, not an instance proxy.
             // Keep current until the implementation address is confirmed for Harmony.
-            dao: '0xc60197f3B0955cf3e384E1f47142296C0597ee6B',
-            daoFactory: '0x7390c1FF3a3Cb27ADB7CefDdB10B43e100012cB6',
-            pluginSetupProcessor: '0x317eb5Ae9DE69387661f6c250913ADA0066dff1D',
-            globalExecutor: '0x4dfD18599539acFF5d63E2dfE8C8AAC44cD90E88',
+            dao: '0x26F52f32DEe79c1708bbe5beDEF7e09cA468178e',
+            daoFactory: '0x90379b3db6ED502178467807E3827f513bFF4F79',
+            pluginSetupProcessor: '0xac1b0f953Ca517F4aB21Cc3E2cdb95b186DBF80D',
+            globalExecutor: '0x7CAC15E6025EA1FBCdcEe3CEad1a879a023e593A',
             conditionFactory: '0x7992fbe76bD9B007AB165Af04Be09BC0F6C89aF6',
         },
     },
