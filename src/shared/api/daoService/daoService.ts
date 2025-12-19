@@ -114,7 +114,13 @@ class DaoService extends AragonBackendService {
     };
 
     getDao = async (params: IGetDaoParams): Promise<IDao> => {
-        const result = await this.request<IDaoApiResponse>(this.urls.dao, params);
+        // Backend v2 does not accept any query params on GET /v2/daos/:id.
+        // If query params are present, it responds with 400 (badParams).
+        // To keep production stable (v2), ignore queryParams when using v2.
+        const apiVersion = apiVersionUtils.getApiVersion();
+        const requestParams = apiVersion === 'v2' ? { ...params, queryParams: undefined } : params;
+
+        const result = await this.request<IDaoApiResponse>(this.urls.dao, requestParams);
 
         return this.withPlugins(result);
     };
