@@ -15,6 +15,8 @@ import type { IDao, IDaoPermission, IDaoPolicy, Network } from './domain';
  */
 type IDaoApiResponse = Omit<IDao, 'plugins'> & {
     plugins?: IDao['plugins'];
+    links?: IDao['links'] | null;
+    metrics?: IDao['metrics'] | null;
 };
 
 class DaoService extends AragonBackendService {
@@ -57,19 +59,41 @@ class DaoService extends AragonBackendService {
      * require an extra call to the plugins-by-dao endpoint.
      */
     private withPlugins = async (dao: IDaoApiResponse): Promise<IDao> => {
-        if (dao.plugins != null && dao.plugins.length > 0) {
-            return dao as IDao;
+        const normalizedDao = this.normalizeDao(dao);
+
+        if (normalizedDao.plugins.length > 0) {
+            return normalizedDao;
         }
 
         try {
-            const { network, address } = this.parseDaoId(dao.id);
+            const { network, address } = this.parseDaoId(normalizedDao.id);
             const plugins = await pluginsService.getPluginsByDao({ urlParams: { network, address } });
 
-            return { ...dao, plugins };
+            return { ...normalizedDao, plugins };
         } catch (error) {
             monitoringUtils.logError(error);
-            return dao as IDao;
+            return normalizedDao;
         }
+    };
+
+    private normalizeDao = (dao: IDaoApiResponse): IDao => {
+        const missing: string[] = [];
+
+        const plugins = Array.isArray(dao.plugins) ? dao.plugins : (missing.push('plugins'), []);
+        const links = Array.isArray(dao.links) ? dao.links : (missing.push('links'), []);
+        const metrics =
+            dao.metrics != null
+                ? dao.metrics
+                : (missing.push('metrics'), { proposalsCreated: 0, members: 0, tvlUSD: '0' });
+
+        if (missing.length > 0) {
+            monitoringUtils.logMessage('DAO response missing fields', {
+                context: { daoId: dao.id, missing: missing.join(',') },
+                level: 'warning',
+            });
+        }
+
+        return { ...(dao as Omit<IDao, 'plugins' | 'links' | 'metrics'>), plugins, links, metrics };
     };
 
     getDao = async (params: IGetDaoParams): Promise<IDao> => {
