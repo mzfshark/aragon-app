@@ -86,6 +86,16 @@ class DaoService extends AragonBackendService {
                 ? dao.metrics
                 : (missing.push('metrics'), { proposalsCreated: 0, members: 0, tvlUSD: '0' });
 
+        const blockTimestamp =
+            typeof (dao as IDao).blockTimestamp === 'number'
+                ? (dao as IDao).blockTimestamp
+                : (missing.push('blockTimestamp'), 0);
+
+        const transactionHash =
+            typeof (dao as IDao).transactionHash === 'string'
+                ? (dao as IDao).transactionHash
+                : (missing.push('transactionHash'), '');
+
         if (missing.length > 0) {
             monitoringUtils.logMessage('DAO response missing fields', {
                 context: { daoId: dao.id, missing: missing.join(',') },
@@ -93,7 +103,14 @@ class DaoService extends AragonBackendService {
             });
         }
 
-        return { ...(dao as Omit<IDao, 'plugins' | 'links' | 'metrics'>), plugins, links, metrics };
+        return {
+            ...(dao as Omit<IDao, 'plugins' | 'links' | 'metrics' | 'blockTimestamp' | 'transactionHash'>),
+            plugins,
+            links,
+            metrics,
+            blockTimestamp,
+            transactionHash,
+        };
     };
 
     getDao = async (params: IGetDaoParams): Promise<IDao> => {

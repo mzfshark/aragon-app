@@ -50,7 +50,19 @@ export class ErrorBoundaryClass extends Component<IErrorBoundaryClassProps, IErr
 
         monitoringUtils.logError(error, { context });
 
-        // Útil para debug em produção (o console do navegador pode estar “silencioso” por config/filters)
+        const isProd = process.env.NODE_ENV === 'production';
+
+        // Em dev, sempre loga no console para facilitar diagnóstico.
+        // Em prod, só loga se explicitamente habilitado.
+        const shouldLogToConsole =
+            process.env.NODE_ENV !== 'production' || process.env.NEXT_PUBLIC_DEBUG_CLIENT_ERRORS === 'true';
+
+        if (shouldLogToConsole) {
+            // eslint-disable-next-line no-console
+            console.error('[ErrorBoundary] UI crash', { error, ...context });
+        }
+
+        // Em produção, loga no console apenas quando explicitamente habilitado.
         if (process.env.NEXT_PUBLIC_DEBUG_CLIENT_ERRORS === 'true') {
             // eslint-disable-next-line no-console
             console.error('[ErrorBoundary] UI crash', { error, ...context });

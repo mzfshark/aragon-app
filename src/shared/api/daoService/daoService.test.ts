@@ -31,6 +31,8 @@ describe('dao service', () => {
         const rawDao = generateDao() as unknown as Record<string, unknown>;
         rawDao.links = null;
         rawDao.metrics = null;
+        rawDao.blockTimestamp = null;
+        rawDao.transactionHash = null;
 
         const params = { urlParams: { id: 'dao-test' } };
 
@@ -39,6 +41,8 @@ describe('dao service', () => {
 
         expect(result.links).toEqual([]);
         expect(result.metrics).toEqual({ proposalsCreated: 0, members: 0, tvlUSD: '0' });
+        expect(result.blockTimestamp).toBe(0);
+        expect(result.transactionHash).toBe('');
     });
 
     it('getDaoByEns fetches the specified DAO by ENS', async () => {
