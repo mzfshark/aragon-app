@@ -1,6 +1,6 @@
 import { ErrorFeedback } from '@/shared/components/errorFeedback';
 import { monitoringUtils } from '@/shared/utils/monitoringUtils';
-import { Component, type ReactNode } from 'react';
+import { Component, type ErrorInfo, type ReactNode } from 'react';
 
 export interface IErrorBoundaryClassState {
     /**
@@ -38,12 +38,23 @@ export class ErrorBoundaryClass extends Component<IErrorBoundaryClassProps, IErr
     componentDidUpdate(prevProps: Readonly<IErrorBoundaryClassProps>): void {
         // Reset error state on route change
         if (this.props.pathname !== prevProps.pathname) {
-            this.setState({ hasError: false });
+            this.setState({ hasError: false, error: undefined });
         }
     }
 
-    componentDidCatch() {
-        monitoringUtils.logError(this.state.error);
+    componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        const context = {
+            pathname: this.props.pathname,
+            componentStack: errorInfo.componentStack,
+        };
+
+        monitoringUtils.logError(error, { context });
+
+        // Útil para debug em produção (o console do navegador pode estar “silencioso” por config/filters)
+        if (process.env.NEXT_PUBLIC_DEBUG_CLIENT_ERRORS === 'true') {
+            // eslint-disable-next-line no-console
+            console.error('[ErrorBoundary] UI crash', { error, ...context });
+        }
     }
 
     render() {
