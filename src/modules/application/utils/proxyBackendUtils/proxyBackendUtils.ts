@@ -44,11 +44,13 @@ export class ProxyBackendUtils {
     };
 
     private buildBackendUrl = (request: NextRequest): string => {
-        const [, relativeUrl] = request.nextUrl.href.split(this.proxyUrl);
-        const baseUrl = process.env.ARAGON_BACKEND_URL;
+        const [, relativeUrlRaw] = request.nextUrl.href.split(this.proxyUrl);
+        const relativeUrl = relativeUrlRaw ?? '';
+
+        const baseUrl = process.env.ARAGON_BACKEND_URL ?? process.env.NEXT_PUBLIC_ARAGON_BACKEND_URL;
         if (!baseUrl) {
             throw new Error(
-                'ARAGON_BACKEND_URL não configurada. Defina no ambiente do servidor para habilitar o proxy /api/backend.',
+                'ARAGON_BACKEND_URL não configurada. Defina no ambiente do servidor (ou use NEXT_PUBLIC_ARAGON_BACKEND_URL como fallback) para habilitar o proxy /api/backend.',
             );
         }
         // Validate protocol; if missing, try to prefix http:// to avoid ERR_INVALID_URL in dev
@@ -69,6 +71,9 @@ export class ProxyBackendUtils {
                 );
             }
         }
+
+        // Remove trailing slash to avoid double slashes when concatenating
+        normalizedBase = normalizedBase.replace(/\/$/, '');
 
         const url = `${normalizedBase}${relativeUrl}`;
 
