@@ -6,6 +6,13 @@ class ApiVersionUtils {
      * Defaults to v2 for safety (production stable).
      */
     getApiVersion = (): ApiVersion => {
+        // The backend deployed in production is expected to expose v2.
+        // Even if someone accidentally sets NEXT_PUBLIC_API_VERSION=v3 in prod,
+        // default to v2 to avoid breaking core flows (DAO details, proposals, etc.).
+        if (process.env.NODE_ENV === 'production') {
+            return 'v2';
+        }
+
         const version = process.env.NEXT_PUBLIC_API_VERSION;
         return version === 'v3' ? 'v3' : 'v2';
     };
