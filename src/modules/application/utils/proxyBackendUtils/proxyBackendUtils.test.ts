@@ -67,22 +67,22 @@ describe('proxyBackend utils', () => {
 
     describe('buildBackendUrl', () => {
         it('returns the URL of the backend service', () => {
-            const href = 'http://harmonygov.servebeer.com:3000/api/backend/dao/0x1234?network=mainnet';
-            process.env.ARAGON_BACKEND_URL = 'http://harmonygov.servebeer.com:3000';
+            const href = 'http://dao-api.whostler.com/api/backend/dao/0x1234?network=mainnet';
+            process.env.ARAGON_BACKEND_URL = 'http://dao-api.whostler.com';
             const testClass = new ProxyBackendUtils();
             const request = generateNextRequest({ nextUrl: { href } as NextURL });
             expect(testClass['buildBackendUrl'](request)).toEqual(
-                'http://harmonygov.servebeer.com:3000/dao/0x1234?network=mainnet',
+                'http://dao-api.whostler.com/dao/0x1234?network=mainnet',
             );
         });
 
         it('falls back to NEXT_PUBLIC_ARAGON_BACKEND_URL when ARAGON_BACKEND_URL is not set', () => {
             const href = 'https://governance.country/api/backend/v2/daos?page=1&pageSize=10';
             delete process.env.ARAGON_BACKEND_URL;
-            process.env.NEXT_PUBLIC_ARAGON_BACKEND_URL = 'http://harmonygov.servebeer.com:3000';
+            process.env.NEXT_PUBLIC_ARAGON_BACKEND_URL = 'http://dao-api.whostler.com';
             const testClass = new ProxyBackendUtils();
             const request = generateNextRequest({ nextUrl: { href } as NextURL });
-            expect(testClass['buildBackendUrl'](request)).toEqual('http://harmonygov.servebeer.com:3000/v2/daos?page=1&pageSize=10');
+            expect(testClass['buildBackendUrl'](request)).toEqual('http://dao-api.whostler.com/v2/daos?page=1&pageSize=10');
         });
     });
 });
