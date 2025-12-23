@@ -67,12 +67,12 @@ describe('proxyBackend utils', () => {
 
     describe('buildBackendUrl', () => {
         it('returns the URL of the backend service', () => {
-            const href = 'http://dao-api.whostler.com/api/backend/dao/0x1234?network=mainnet';
+            const href = 'http://dao-api.whostler.com/api/backend/dao/0x1234?network=harmony-mainnet';
             process.env.ARAGON_BACKEND_URL = 'http://dao-api.whostler.com';
             const testClass = new ProxyBackendUtils();
             const request = generateNextRequest({ nextUrl: { href } as NextURL });
             expect(testClass['buildBackendUrl'](request)).toEqual(
-                'http://dao-api.whostler.com/dao/0x1234?network=mainnet',
+                'http://dao-api.whostler.com/dao/0x1234?network=harmony-mainnet',
             );
         });
 
