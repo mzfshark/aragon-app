@@ -8,11 +8,14 @@ export class AragonBackendService extends HttpService {
         // it through the /api/backend NextJs route.
         // NOTE: In production, it's common to configure only NEXT_PUBLIC_ARAGON_BACKEND_URL (for the proxy route).
         // The DAO page performs SSR data fetching, so we also need a server-side base URL.
-        const baseUrl = typeof window === 'undefined' ? this.getServerBaseUrl() : '/api/backend';
-        super(baseUrl, AragonBackendServiceError.fromResponse, process.env.NEXT_SECRET_ARAGON_BACKEND_API_KEY);
+        super(
+            typeof window === 'undefined' ? AragonBackendService.getServerBaseUrl() : '/api/backend',
+            AragonBackendServiceError.fromResponse,
+            process.env.NEXT_SECRET_ARAGON_BACKEND_API_KEY,
+        );
     }
 
-    private getServerBaseUrl = (): string => {
+    private static getServerBaseUrl(): string {
         const raw = process.env.ARAGON_BACKEND_URL ?? process.env.NEXT_PUBLIC_ARAGON_BACKEND_URL;
         if (!raw) {
             throw new Error(
@@ -40,7 +43,7 @@ export class AragonBackendService extends HttpService {
 
         // Remove trailing slash to avoid double slashes when concatenating
         return normalized.replace(/\/$/, '');
-    };
+    }
 
     getNextPageParams = <TParams extends IRequestQueryParams<object>, TData = unknown>(
         lastPage: IPaginatedResponse<TData>,
