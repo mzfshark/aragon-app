@@ -4,7 +4,7 @@ import type { IGetPluginsByDaoParams } from './pluginsService.api';
 
 class PluginsService extends AragonBackendService {
     private urls = {
-        pluginsByDao: '/v2/plugins/by-dao/:network/:address/details',
+        pluginsByDao: '/v2/plugins/by-dao/:network/:address',
     };
 
     getPluginsByDao = async (params: IGetPluginsByDaoParams): Promise<IDaoPlugin[]> => {
