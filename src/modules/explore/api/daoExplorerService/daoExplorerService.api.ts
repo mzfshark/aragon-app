@@ -42,4 +42,5 @@ export interface ISetDaoVisibilityStatusUrlParams {
     status: 'true' | 'false';
 }
 
-export interface ISetDaoVisibilityStatusParams extends IRequestUrlQueryParams<ISetDaoVisibilityStatusUrlParams> {}
+export interface ISetDaoVisibilityStatusParams
+    extends IRequestUrlQueryParams<ISetDaoVisibilityStatusUrlParams, Record<string, never>> {}
