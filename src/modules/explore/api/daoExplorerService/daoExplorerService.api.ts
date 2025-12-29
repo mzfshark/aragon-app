@@ -31,3 +31,15 @@ export interface IGetDaoListByMemberQueryParams extends IPaginatedRequest, IOrde
 
 export interface IGetDaoListByMemberAddressParams
     extends IRequestUrlQueryParams<IGetDaoListByMemberUrlParams, IGetDaoListByMemberQueryParams> {}
+
+export interface ISetDaoVisibilityStatusUrlParams {
+    daoAddress: string;
+    network: Network;
+    /**
+     * Visibility status (true = visible, false = hidden)
+     * Note: must be stringified to fit url param replacement.
+     */
+    status: 'true' | 'false';
+}
+
+export interface ISetDaoVisibilityStatusParams extends IRequestUrlQueryParams<ISetDaoVisibilityStatusUrlParams> {}

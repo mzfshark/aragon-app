@@ -7,17 +7,20 @@ import { DaoList, type IDaoListProps } from './daoList';
 describe('<DaoList /> component', () => {
     const useDaoListSpy = jest.spyOn(daoExplorerService, 'useDaoList');
     const useDaoListByMemberAddressSpy = jest.spyOn(daoExplorerService, 'useDaoListByMemberAddress');
+    const useArchivedDaoListSpy = jest.spyOn(daoExplorerService, 'useArchivedDaoList');
 
     beforeEach(() => {
         useDaoListSpy.mockReturnValue(generateReactQueryInfiniteResultSuccess({ data: { pages: [], pageParams: [] } }));
         useDaoListByMemberAddressSpy.mockReturnValue(
             generateReactQueryInfiniteResultSuccess({ data: { pages: [], pageParams: [] } }),
         );
+        useArchivedDaoListSpy.mockReturnValue(generateReactQueryInfiniteResultSuccess({ data: { pages: [], pageParams: [] } }));
     });
 
     afterEach(() => {
         useDaoListSpy.mockReset();
         useDaoListByMemberAddressSpy.mockReset();
+        useArchivedDaoListSpy.mockReset();
     });
 
     const createTestComponent = (props?: Partial<IDaoListProps>) => {
@@ -44,6 +47,7 @@ describe('<DaoList /> component', () => {
             expect.anything(),
             expect.objectContaining({ enabled: false }),
         );
+        expect(useArchivedDaoListSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ enabled: false }));
         expect(screen.getAllByRole('link')).toHaveLength(daos.length);
         expect(screen.getByText(daos[0].name)).toBeInTheDocument();
         expect(screen.getByText(daos[1].name)).toBeInTheDocument();
@@ -65,6 +69,7 @@ describe('<DaoList /> component', () => {
             expect.anything(),
             expect.objectContaining({ enabled: true }),
         );
+        expect(useArchivedDaoListSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ enabled: false }));
         expect(screen.getAllByRole('link')).toHaveLength(daos.length);
         expect(screen.getByText(daos[0].name)).toBeInTheDocument();
         expect(screen.getByText(daos[1].name)).toBeInTheDocument();

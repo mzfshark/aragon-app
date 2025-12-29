@@ -6,6 +6,7 @@ import { daoUtils } from '@/shared/utils/daoUtils';
 import { dataListUtils } from '@/shared/utils/dataListUtils';
 import { ipfsUtils } from '@/shared/utils/ipfsUtils';
 import {
+    Button,
     DaoDataListItem,
     DataListContainer,
     DataListFilter,
@@ -19,6 +20,7 @@ import {
     useDaoList,
     useDaoListByMemberAddress,
     useArchivedDaoList,
+    useSetDaoVisibilityStatus,
     type IGetDaoListByMemberAddressParams,
     type IGetDaoListParams,
 } from '../../api/daoExplorerService';
@@ -44,10 +46,15 @@ export interface IDaoListProps {
      * Show DAO search input.
      */
     showSearch?: boolean;
+
+    /**
+     * Enables root-only archive/unarchive actions in the list.
+     */
+    enableRootActions?: boolean;
 }
 
 export const DaoList: React.FC<IDaoListProps> = (props) => {
-    const { initialParams, archivedParams, memberParams, layoutClassNames, showSearch } = props;
+    const { initialParams, archivedParams, memberParams, layoutClassNames, showSearch, enableRootActions } = props;
     const { t } = useTranslations();
 
     invariant(
@@ -98,6 +105,12 @@ export const DaoList: React.FC<IDaoListProps> = (props) => {
         description: t('app.explore.daoList.errorState.description'),
     };
 
+    const { mutate: setVisibilityStatus, isPending: isSettingVisibility } = useSetDaoVisibilityStatus();
+
+    const showVisibilityAction =
+        enableRootActions === true && (archivedParams != null || (memberParams == null && initialParams != null));
+    const isArchivedList = archivedParams != null;
+
     return (
         <DataListRoot
             entityLabel={t('app.explore.daoList.entity')}
@@ -120,16 +133,42 @@ export const DaoList: React.FC<IDaoListProps> = (props) => {
                 layoutClassName={layoutClassNames ?? 'grid grid-cols-1 lg:grid-cols-2'}
             >
                 {daoList?.map((dao) => (
-                    <DaoDataListItem.Structure
-                        key={dao.id}
-                        href={daoUtils.getDaoUrl(dao, 'dashboard')}
-                        ens={daoUtils.getDaoEns(dao)}
-                        address={dao.address}
-                        name={dao.name}
-                        description={dao.description}
-                        network={networkDefinitions[dao.network].name}
-                        logoSrc={ipfsUtils.cidToSrc(dao.avatar)}
-                    />
+                    <div key={dao.id} className="relative">
+                        <DaoDataListItem.Structure
+                            href={daoUtils.getDaoUrl(dao, 'dashboard')}
+                            ens={daoUtils.getDaoEns(dao)}
+                            address={dao.address}
+                            name={dao.name}
+                            description={dao.description}
+                            network={networkDefinitions[dao.network].name}
+                            logoSrc={ipfsUtils.cidToSrc(dao.avatar)}
+                        />
+                        {showVisibilityAction && (
+                            <div className="absolute right-3 top-3 z-10">
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={isSettingVisibility}
+                                    onClick={(event) => {
+                                        event.preventDefault();
+                                        event.stopPropagation();
+
+                                        setVisibilityStatus({
+                                            urlParams: {
+                                                daoAddress: dao.address,
+                                                network: dao.network,
+                                                status: isArchivedList ? 'true' : 'false',
+                                            },
+                                        });
+                                    }}
+                                >
+                                    {isArchivedList
+                                        ? t('app.explore.daoList.actions.restore')
+                                        : t('app.explore.daoList.actions.archive')}
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 ))}
             </DataListContainer>
             <DataListPagination />

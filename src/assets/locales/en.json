@@ -932,7 +932,11 @@
           "description": "There was an error loading the DAOs. Try again later.",
           "heading": "Error loading DAOs"
         },
-        "searchPlaceholder": "Search by name, address, or ENS"
+        "searchPlaceholder": "Search by name, address, or ENS",
+        "actions": {
+          "archive": "Archive",
+          "restore": "Restore"
+        }
       },
       "exploreDao": {
         "createDao": "Create a DAO",

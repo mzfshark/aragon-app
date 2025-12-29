@@ -1,7 +1,7 @@
 import { AragonBackendService, type IPaginatedResponse } from '@/shared/api/aragonBackendService';
 import { AragonAdminBackendService } from '@/shared/api/aragonAdminBackendService/aragonAdminBackendService';
 import type { IDao } from '@/shared/api/daoService';
-import type { IGetDaoListByMemberAddressParams, IGetDaoListParams } from './daoExplorerService.api';
+import type { IGetDaoListByMemberAddressParams, IGetDaoListParams, ISetDaoVisibilityStatusParams } from './daoExplorerService.api';
 
 class DaoExplorerService extends AragonBackendService {
     private urls = {
@@ -27,10 +27,16 @@ export const daoExplorerService = new DaoExplorerService();
 class DaoExplorerAdminService extends AragonAdminBackendService {
     private urls = {
         archivedDaos: '/dao/archived',
+        setVisibilityStatus: '/dao/set-status/:daoAddress/:network/:status',
     };
 
     getArchivedDaoList = async ({ queryParams }: IGetDaoListParams): Promise<IPaginatedResponse<IDao>> => {
         const result = await this.request<IPaginatedResponse<IDao>>(this.urls.archivedDaos, { queryParams });
+        return result;
+    };
+
+    setDaoVisibilityStatus = async (params: ISetDaoVisibilityStatusParams): Promise<boolean> => {
+        const result = await this.request<boolean>(this.urls.setVisibilityStatus, params, { method: 'POST' });
         return result;
     };
 }

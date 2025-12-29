@@ -89,7 +89,13 @@ export const ExploreDaos: React.FC<IExploreDaosProps> = (props) => {
                     {t('app.explore.exploreDao.createDao')}
                 </Button>
             </div>
-            <DaoList initialParams={initialParams} memberParams={memberParams} archivedParams={archivedParams} showSearch={true} />
+            <DaoList
+                initialParams={initialParams}
+                memberParams={memberParams}
+                archivedParams={archivedParams}
+                showSearch={true}
+                enableRootActions={isRootModeEnabled}
+            />
         </div>
     );
 };
