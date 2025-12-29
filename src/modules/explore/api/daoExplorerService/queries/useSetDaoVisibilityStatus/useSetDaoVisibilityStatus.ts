@@ -11,18 +11,21 @@ export type SetDaoVisibilityStatusMutationOptions = Omit<
 
 export const useSetDaoVisibilityStatus = (options?: SetDaoVisibilityStatusMutationOptions) => {
     const queryClient = useQueryClient();
+    const { onSuccess, ...restOptions } = options ?? {};
 
     return useMutation<boolean, unknown, ISetDaoVisibilityStatusParams>({
         mutationFn: (params) => daoExplorerAdminService.setDaoVisibilityStatus(params),
-        ...options,
-        onSuccess: async (data, variables, context) => {
+        ...restOptions,
+        onSuccess: async (
+            ...args: Parameters<NonNullable<SetDaoVisibilityStatusMutationOptions['onSuccess']>>
+        ) => {
             await Promise.all([
                 queryClient.invalidateQueries({ queryKey: [DaoExplorerServiceKey.DAO_LIST] }),
                 queryClient.invalidateQueries({ queryKey: [DaoExplorerServiceKey.ARCHIVED_DAO_LIST] }),
                 queryClient.invalidateQueries({ queryKey: [DaoExplorerServiceKey.DAO_LIST_BY_MEMBER_ADDRESS] }),
             ]);
 
-            await options?.onSuccess?.(data, variables, context);
+            await onSuccess?.(...args);
         },
     });
 };
