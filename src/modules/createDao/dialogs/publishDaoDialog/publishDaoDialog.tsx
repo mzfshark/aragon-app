@@ -14,10 +14,12 @@ import {
 import { useTranslations } from '@/shared/components/translationsProvider';
 import { networkDefinitions } from '@/shared/constants/networkDefinitions';
 import { useStepper } from '@/shared/hooks/useStepper';
+import { pluginTransactionUtils } from '@/shared/utils/pluginTransactionUtils';
 import { DaoDataListItem, invariant } from '@aragon/gov-ui-kit';
 import { useCallback, useMemo } from 'react';
 import { useAccount } from 'wagmi';
 import type { ICreateDaoFormData } from '../../components/createDaoForm';
+import { adminPlugin } from '@/plugins/adminPlugin/constants/adminPlugin';
 import { publishDaoDialogUtils } from './publishDaoDialogUtils';
 
 export enum PublishDaoStep {
@@ -112,7 +114,21 @@ export const PublishDaoDialog: React.FC<IPublishDaoDialogProps> = (props) => {
         const daoAddress = publishDaoDialogUtils.getDaoAddress(receipt)!;
         const daoEnsName = ens !== '' ? `${ens}.dao.eth` : undefined;
 
-        return `/dao/${network}/${daoEnsName ?? daoAddress}`;
+        const daoPath = `/dao/${network}/${daoEnsName ?? daoAddress}`;
+
+        // Continuação do fluxo padrão: abrir o wizard de criação de Process para configurar/instalar plugins (TokenVoting/Multisig)
+        // usando o Admin plugin recém-instalado como executor.
+        const adminRepo = adminPlugin.repositoryAddresses[network]?.toLowerCase();
+        const installations = pluginTransactionUtils.getPluginInstallationSetupData(receipt);
+        const adminInstallation = installations.find(
+            (i) => adminRepo != null && i.pluginSetupRepo.toLowerCase() === adminRepo,
+        );
+
+        if (adminInstallation?.pluginAddress) {
+            return `${daoPath}/create/${adminInstallation.pluginAddress}/process`;
+        }
+
+        return daoPath;
     };
 
     const metadataPinAction = values.avatar?.file ? handlePinFile : handlePinData;
