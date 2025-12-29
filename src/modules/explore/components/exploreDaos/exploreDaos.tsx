@@ -27,10 +27,13 @@ export const ExploreDaos: React.FC<IExploreDaosProps> = (props) => {
     const { address } = useAccount();
     const { open } = useDialogContext();
 
+    const isRootModeEnabled = process.env.NEXT_PUBLIC_FEAT_ROOT === 'true';
+    const validValues = isRootModeEnabled ? ['all', 'member', 'archived'] : ['all', 'member'];
+
     const [daoFilter, setDaoFilter] = useFilterUrlParam({
         name: exploreDaoFilterParam,
         fallbackValue: 'all',
-        validValues: ['all', 'member'],
+        validValues,
         enableUrlUpdate: true,
     });
 
@@ -55,6 +58,11 @@ export const ExploreDaos: React.FC<IExploreDaosProps> = (props) => {
             ? { urlParams: { address }, queryParams: memberQueryParams }
             : undefined;
 
+    const archivedParams =
+        daoFilter === 'archived'
+            ? { queryParams: { sort: 'metrics.tvlUSD', networks: networkUtils.getSupportedNetworks() } }
+            : undefined;
+
     return (
         <div className="flex grow flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -70,6 +78,7 @@ export const ExploreDaos: React.FC<IExploreDaosProps> = (props) => {
                         label={t('app.explore.exploreDao.filter.member')}
                         disabled={address == null}
                     />
+                    {isRootModeEnabled && <Toggle value="archived" label={t('app.explore.exploreDao.filter.archived')} />}
                 </ToggleGroup>
                 <Button
                     variant="primary"
@@ -80,7 +89,7 @@ export const ExploreDaos: React.FC<IExploreDaosProps> = (props) => {
                     {t('app.explore.exploreDao.createDao')}
                 </Button>
             </div>
-            <DaoList initialParams={initialParams} memberParams={memberParams} showSearch={true} />
+            <DaoList initialParams={initialParams} memberParams={memberParams} archivedParams={archivedParams} showSearch={true} />
         </div>
     );
 };

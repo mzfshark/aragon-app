@@ -938,7 +938,8 @@
         "createDao": "Create a DAO",
         "filter": {
           "all": "All DAOs",
-          "member": "Member"
+          "member": "Member",
+          "archived": "Archived"
         }
       },
       "exploreDaosPage": {

@@ -1,4 +1,5 @@
 import { AragonBackendService, type IPaginatedResponse } from '@/shared/api/aragonBackendService';
+import { AragonAdminBackendService } from '@/shared/api/aragonAdminBackendService/aragonAdminBackendService';
 import type { IDao } from '@/shared/api/daoService';
 import type { IGetDaoListByMemberAddressParams, IGetDaoListParams } from './daoExplorerService.api';
 
@@ -22,3 +23,16 @@ class DaoExplorerService extends AragonBackendService {
 }
 
 export const daoExplorerService = new DaoExplorerService();
+
+class DaoExplorerAdminService extends AragonAdminBackendService {
+    private urls = {
+        archivedDaos: '/dao/archived',
+    };
+
+    getArchivedDaoList = async ({ queryParams }: IGetDaoListParams): Promise<IPaginatedResponse<IDao>> => {
+        const result = await this.request<IPaginatedResponse<IDao>>(this.urls.archivedDaos, { queryParams });
+        return result;
+    };
+}
+
+export const daoExplorerAdminService = new DaoExplorerAdminService();

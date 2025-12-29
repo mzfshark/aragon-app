@@ -18,6 +18,7 @@ import { useState } from 'react';
 import {
     useDaoList,
     useDaoListByMemberAddress,
+    useArchivedDaoList,
     type IGetDaoListByMemberAddressParams,
     type IGetDaoListParams,
 } from '../../api/daoExplorerService';
@@ -27,6 +28,10 @@ export interface IDaoListProps {
      * Initial parameters to use for fetching the list of DAOs.
      */
     initialParams?: IGetDaoListParams;
+    /**
+     * Parameters to use for fetching the list of archived (hidden) DAOs. Overrides other params when set.
+     */
+    archivedParams?: IGetDaoListParams;
     /**
      * Parameters to use for fetching the list of DAOs for a given address. Overrides the initialParams when set.
      */
@@ -42,12 +47,12 @@ export interface IDaoListProps {
 }
 
 export const DaoList: React.FC<IDaoListProps> = (props) => {
-    const { initialParams, memberParams, layoutClassNames, showSearch } = props;
+    const { initialParams, archivedParams, memberParams, layoutClassNames, showSearch } = props;
     const { t } = useTranslations();
 
     invariant(
-        initialParams != null || memberParams != null,
-        'DaoList: either initialParams or memberParams must be provided',
+        archivedParams != null || initialParams != null || memberParams != null,
+        'DaoList: one of archivedParams, initialParams or memberParams must be provided',
     );
 
     const [searchValue, setSearchValue] = useState<string>();
@@ -55,7 +60,12 @@ export const DaoList: React.FC<IDaoListProps> = (props) => {
 
     const defaultResult = useDaoList(
         { ...initialParams, queryParams: { ...initialParams?.queryParams, search: searchValueDebounced } },
-        { enabled: initialParams != null && memberParams == null },
+        { enabled: initialParams != null && memberParams == null && archivedParams == null },
+    );
+
+    const archivedResult = useArchivedDaoList(
+        { ...archivedParams, queryParams: { ...archivedParams?.queryParams, search: searchValueDebounced } },
+        { enabled: archivedParams != null },
     );
 
     const memberResult = useDaoListByMemberAddress(
@@ -64,14 +74,17 @@ export const DaoList: React.FC<IDaoListProps> = (props) => {
     );
 
     const { data, fetchNextPage, status, fetchStatus, isFetchingNextPage } =
-        memberParams != null ? memberResult : defaultResult;
+        archivedParams != null ? archivedResult : memberParams != null ? memberResult : defaultResult;
 
     const daoList = data?.pages.flatMap((page) => page.data);
 
     const state = dataListUtils.queryToDataListState({ status, fetchStatus, isFetchingNextPage });
 
     const pageSize =
-        initialParams?.queryParams.pageSize ?? memberParams?.queryParams.pageSize ?? data?.pages[0]?.metadata?.pageSize;
+        archivedParams?.queryParams.pageSize ??
+        initialParams?.queryParams.pageSize ??
+        memberParams?.queryParams.pageSize ??
+        data?.pages[0]?.metadata?.pageSize;
 
     const itemsCount = data?.pages[0]?.metadata?.totalRecords;
 
