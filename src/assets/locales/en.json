@@ -2602,6 +2602,10 @@
           "governanceInfoTitle": "Governance",
           "settingsInfoTitle": "DAO",
           "title": "Settings"
+        },
+        "rootActions": {
+          "archive": "Archive DAO",
+          "restore": "Restore DAO"
         }
       },
       "daoVersionInfo": {

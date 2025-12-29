@@ -15,7 +15,7 @@ import { useDaoPlugins } from '@/shared/hooks/useDaoPlugins';
 import { PluginType } from '@/shared/types';
 import { daoUtils } from '@/shared/utils/daoUtils';
 import { versionComparatorUtils } from '@/shared/utils/versionComparatorUtils';
-import { IconType } from '@aragon/gov-ui-kit';
+import { Button, IconType } from '@aragon/gov-ui-kit';
 import { useRouter } from 'next/navigation';
 import { CapitalFlowDialogId } from '../../../capitalFlow/constants/capitalFlowDialogId';
 import { CreateDaoDialogId } from '../../../createDao/constants/createDaoDialogId';
@@ -25,6 +25,7 @@ import { DaoSettingsInfo } from '../../components/daoSettingsInfo';
 import { DaoVersionInfo } from '../../components/daoVersionInfo';
 import { UpdateDaoContracts } from '../../components/updateDaoContracts';
 import { SettingsSlotId } from '../../constants/moduleSlots';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface IDaoSettingsPageClientProps {
     /**
@@ -46,6 +47,43 @@ export const DaoSettingsPageClient: React.FC<IDaoSettingsPageClientProps> = (pro
 
     const daoParams = { urlParams: { id: daoId } };
     const { data: dao } = useDao(daoParams);
+
+    const isRootModeEnabled = process.env.NEXT_PUBLIC_FEAT_ROOT === 'true';
+    const queryClient = useQueryClient();
+
+    const { data: visibilityStatus } = useQuery({
+        queryKey: ['daoVisibilityStatus', dao?.network, dao?.address],
+        enabled: isRootModeEnabled && dao != null,
+        queryFn: async (): Promise<{ status: boolean }> => {
+            const response = await fetch(`/api/admin-backend/dao/status/${dao?.address}/${dao?.network}`, {
+                cache: 'no-store',
+            });
+
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            return (await response.json()) as { status: boolean };
+        },
+    });
+
+    const { mutate: toggleDaoVisibility, isPending: isTogglingVisibility } = useMutation({
+        mutationFn: async (nextStatus: boolean) => {
+            const response = await fetch(
+                `/api/admin-backend/dao/set-status/${dao?.address}/${dao?.network}/${nextStatus ? 'true' : 'false'}`,
+                { method: 'POST', cache: 'no-store' },
+            );
+
+            if (!response.ok) {
+                throw new Error(response.statusText);
+            }
+
+            return (await response.json()) as boolean;
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ['daoVisibilityStatus', dao?.network, dao?.address] });
+        },
+    });
 
     const processPlugins = useDaoPlugins({ daoId, type: PluginType.PROCESS })!;
 
@@ -201,6 +239,24 @@ export const DaoSettingsPageClient: React.FC<IDaoSettingsPageClientProps> = (pro
                 <Page.AsideCard title={t('app.settings.daoSettingsPage.aside.versionInfoTitle')}>
                     <DaoVersionInfo dao={dao} />
                     <UpdateDaoContracts dao={dao} />
+                    {isRootModeEnabled && (
+                        <div className="mt-3">
+                            <Button
+                                variant="secondary"
+                                size="md"
+                                disabled={isTogglingVisibility || visibilityStatus == null}
+                                onClick={() => {
+                                    const currentIsVisible = visibilityStatus?.status;
+                                    const nextStatus = currentIsVisible === false;
+                                    toggleDaoVisibility(nextStatus);
+                                }}
+                            >
+                                {visibilityStatus?.status === false
+                                    ? t('app.settings.daoSettingsPage.rootActions.restore')
+                                    : t('app.settings.daoSettingsPage.rootActions.archive')}
+                            </Button>
+                        </div>
+                    )}
                 </Page.AsideCard>
             </Page.Aside>
         </>
