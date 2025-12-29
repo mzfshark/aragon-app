@@ -5,6 +5,7 @@ import { networkDefinitions } from '@/shared/constants/networkDefinitions';
 import { daoUtils } from '@/shared/utils/daoUtils';
 import { dataListUtils } from '@/shared/utils/dataListUtils';
 import { ipfsUtils } from '@/shared/utils/ipfsUtils';
+import type { Network } from '@/shared/api/daoService';
 import {
     Button,
     DaoDataListItem,
@@ -16,11 +17,13 @@ import {
     useDebouncedValue,
 } from '@aragon/gov-ui-kit';
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     useDaoList,
     useDaoListByMemberAddress,
     useArchivedDaoList,
-    useSetDaoVisibilityStatus,
+    daoExplorerAdminService,
+    DaoExplorerServiceKey,
     type IGetDaoListByMemberAddressParams,
     type IGetDaoListParams,
 } from '../../api/daoExplorerService';
@@ -105,7 +108,20 @@ export const DaoList: React.FC<IDaoListProps> = (props) => {
         description: t('app.explore.daoList.errorState.description'),
     };
 
-    const { mutate: setVisibilityStatus, isPending: isSettingVisibility } = useSetDaoVisibilityStatus();
+    const queryClient = useQueryClient();
+    const { mutate: setVisibilityStatus, isPending: isSettingVisibility } = useMutation({
+        mutationFn: (params: { daoAddress: string; network: Network; status: 'true' | 'false' }) =>
+            daoExplorerAdminService.setDaoVisibilityStatus({
+                urlParams: { daoAddress: params.daoAddress, network: params.network, status: params.status },
+            }),
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({ queryKey: [DaoExplorerServiceKey.DAO_LIST] }),
+                queryClient.invalidateQueries({ queryKey: [DaoExplorerServiceKey.ARCHIVED_DAO_LIST] }),
+                queryClient.invalidateQueries({ queryKey: [DaoExplorerServiceKey.DAO_LIST_BY_MEMBER_ADDRESS] }),
+            ]);
+        },
+    });
 
     const showVisibilityAction =
         enableRootActions === true && (archivedParams != null || (memberParams == null && initialParams != null));
@@ -154,11 +170,9 @@ export const DaoList: React.FC<IDaoListProps> = (props) => {
                                         event.stopPropagation();
 
                                         setVisibilityStatus({
-                                            urlParams: {
-                                                daoAddress: dao.address,
-                                                network: dao.network,
-                                                status: isArchivedList ? 'true' : 'false',
-                                            },
+                                            daoAddress: dao.address,
+                                            network: dao.network,
+                                            status: isArchivedList ? 'true' : 'false',
                                         });
                                     }}
                                 >
