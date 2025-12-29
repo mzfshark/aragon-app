@@ -2,20 +2,29 @@ import { HttpService, type IRequestQueryParams } from '../httpService';
 import { AragonBackendServiceError } from '../aragonBackendService/aragonBackendServiceError';
 import type { IPaginatedResponse } from '../aragonBackendService/domain';
 
+const readServerEnv = (key: string): string | undefined => {
+    if (typeof window !== 'undefined') {
+        return undefined;
+    }
+
+    const maybeProcess = (globalThis as unknown as { process?: { env?: Record<string, string | undefined> } }).process;
+    return maybeProcess?.env?.[key];
+};
+
 export class AragonAdminBackendService extends HttpService {
     constructor() {
         super(
             typeof window === 'undefined' ? AragonAdminBackendService.getServerBaseUrl() : '/api/admin-backend',
             AragonBackendServiceError.fromResponse,
-            process.env.NEXT_SECRET_ARAGON_ADMIN_BACKEND_API_KEY ?? process.env.NEXT_SECRET_ARAGON_BACKEND_API_KEY,
+            readServerEnv('NEXT_SECRET_ARAGON_ADMIN_BACKEND_API_KEY') ?? readServerEnv('NEXT_SECRET_ARAGON_BACKEND_API_KEY'),
         );
     }
 
     private static getServerBaseUrl(): string {
         const raw =
-            process.env.ARAGON_ADMIN_BACKEND_URL ??
-            process.env.ARAGON_BACKEND_URL ??
-            process.env.NEXT_PUBLIC_ARAGON_BACKEND_URL;
+            readServerEnv('ARAGON_ADMIN_BACKEND_URL') ??
+            readServerEnv('ARAGON_BACKEND_URL') ??
+            readServerEnv('NEXT_PUBLIC_ARAGON_BACKEND_URL');
 
         if (!raw) {
             throw new Error(
