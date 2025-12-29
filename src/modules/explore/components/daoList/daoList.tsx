@@ -166,7 +166,7 @@ export const DaoList: React.FC<IDaoListProps> = (props) => {
                                     variant="secondary"
                                     size="sm"
                                     disabled={isSettingVisibility}
-                                    onClick={(event) => {
+                                    onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
                                         event.preventDefault();
                                         event.stopPropagation();
 
