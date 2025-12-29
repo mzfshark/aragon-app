@@ -113,6 +113,7 @@ export const DaoList: React.FC<IDaoListProps> = (props) => {
         mutationFn: (params: { daoAddress: string; network: Network; status: 'true' | 'false' }) =>
             daoExplorerAdminService.setDaoVisibilityStatus({
                 urlParams: { daoAddress: params.daoAddress, network: params.network, status: params.status },
+                queryParams: {},
             }),
         onSuccess: async () => {
             await Promise.all([
