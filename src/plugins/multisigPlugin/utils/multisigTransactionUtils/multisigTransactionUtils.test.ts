@@ -138,14 +138,40 @@ describe('multisigTransaction utils', () => {
 
             const result = multisigTransactionUtils.buildPrepareInstallData(...params);
 
+            const expectedVersionTag =
+                dao.network === Network.HARMONY_MAINNET ? { release: 1, build: 1 } : multisigPlugin.installVersion;
+
             expect(buildPrepareInstallationDataSpy).toHaveBeenCalledWith(
                 multisigPlugin.repositoryAddresses[dao.network],
-                multisigPlugin.installVersion,
+                expectedVersionTag,
                 pluginSettingsData,
                 dao.address,
             );
 
             expect(result).toBe(transactionData);
+        });
+
+        it('uses Harmony published version tag for prepare install', () => {
+            const dao = generateDao({ address: '0x1', network: Network.HARMONY_MAINNET });
+            const body = generateSetupBodyFormData();
+            const pluginSettingsData = '0xPluginSettingsData';
+            const transactionData = '0xTransactionData';
+
+            encodeAbiParametersSpy.mockReturnValue(pluginSettingsData);
+            buildPrepareInstallationDataSpy.mockReturnValue(transactionData);
+
+            const params = [{ metadata: '', body, dao }] as unknown as Parameters<
+                typeof multisigTransactionUtils.buildPrepareInstallData
+            >;
+
+            multisigTransactionUtils.buildPrepareInstallData(...params);
+
+            expect(buildPrepareInstallationDataSpy).toHaveBeenCalledWith(
+                multisigPlugin.repositoryAddresses[dao.network],
+                { release: 1, build: 1 },
+                pluginSettingsData,
+                dao.address,
+            );
         });
 
         it('correctly builds the target config for advanced governance processes', () => {

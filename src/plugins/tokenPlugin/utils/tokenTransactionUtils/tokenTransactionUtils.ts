@@ -6,6 +6,7 @@ import type { IBuildPreparePluginUpdateDataParams, IGetUninstallHelpersParams } 
 import { dateUtils } from '@/shared/utils/dateUtils';
 import { pluginTransactionUtils } from '@/shared/utils/pluginTransactionUtils';
 import { transactionUtils } from '@/shared/utils/transactionUtils';
+import { Network } from '@/shared/api/daoService';
 import { encodeAbiParameters, encodeFunctionData, parseUnits, zeroHash, type Hex } from 'viem';
 import type { ITokenSetupGovernanceForm } from '../../components/tokenSetupGovernance';
 import type { ITokenSetupMembershipForm, ITokenSetupMembershipMember } from '../../components/tokenSetupMembership';
@@ -67,6 +68,9 @@ class TokenTransactionUtils {
         const { members } = body.membership;
 
         const repositoryAddress = tokenPlugin.repositoryAddresses[dao.network];
+        // Use the published version on Harmony (release 1, build 1), otherwise the plugin default
+        const versionTag =
+            dao.network === Network.HARMONY_MAINNET ? { release: 1, build: 1 } : tokenPlugin.installVersion;
 
         const tokenSettings = this.buildInstallDataTokenSettings(body.membership.token);
         const mintSettings = this.buildInstallDataMintSettings(members);
@@ -85,7 +89,7 @@ class TokenTransactionUtils {
 
         const transactionData = pluginTransactionUtils.buildPrepareInstallationData(
             repositoryAddress,
-            tokenPlugin.installVersion,
+            versionTag,
             pluginSettingsData,
             dao.address as Hex,
         );

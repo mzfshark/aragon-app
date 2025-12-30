@@ -186,14 +186,39 @@ describe('tokenTransaction utils', () => {
             const params = [{ metadata, dao, body }] as unknown as BuildDataParams;
             const result = tokenTransactionUtils.buildPrepareInstallData(...params);
 
+            const expectedVersionTag =
+                dao.network === Network.HARMONY_MAINNET ? { release: 1, build: 1 } : tokenPlugin.installVersion;
+
             expect(buildPrepareInstallationDataSpy).toHaveBeenCalledWith(
                 tokenPlugin.repositoryAddresses[dao.network],
-                tokenPlugin.installVersion,
+                expectedVersionTag,
                 encodedPluginData,
                 dao.address,
             );
 
             expect(result).toBe(transactionData);
+        });
+
+        it('uses Harmony published version tag for prepare install', () => {
+            const encodedPluginData = '0xPluginSettingsData';
+            const transactionData = '0xTransactionData';
+            const dao = generateDao({ address: '0x001', network: Network.HARMONY_MAINNET });
+            const body = generateSetupBodyFormData({
+                membership: { members: [], token: {} } as ISetupBodyFormMembership,
+            });
+
+            encodeAbiParametersSpy.mockReturnValue(encodedPluginData);
+            buildPrepareInstallationDataSpy.mockReturnValue(transactionData);
+
+            const params = [{ metadata: '', dao, body }] as unknown as BuildDataParams;
+            tokenTransactionUtils.buildPrepareInstallData(...params);
+
+            expect(buildPrepareInstallationDataSpy).toHaveBeenCalledWith(
+                tokenPlugin.repositoryAddresses[dao.network],
+                { release: 1, build: 1 },
+                encodedPluginData,
+                dao.address,
+            );
         });
 
         it('correctly builds the target config for advanced governance processes', () => {

@@ -3,6 +3,7 @@ import type { IProposalCreate } from '@/modules/governance/dialogs/publishPropos
 import type { IBuildCreateProposalDataParams, IBuildVoteDataParams } from '@/modules/governance/types';
 import { createProposalUtils, type ICreateProposalEndDateForm } from '@/modules/governance/utils/createProposalUtils';
 import type { IBuildPreparePluginUpdateDataParams, IGetUninstallHelpersParams } from '@/modules/settings/types';
+import { Network } from '@/shared/api/daoService';
 import { pluginTransactionUtils } from '@/shared/utils/pluginTransactionUtils';
 import { transactionUtils } from '@/shared/utils/transactionUtils';
 import { encodeAbiParameters, encodeFunctionData, zeroHash, type Hex } from 'viem';
@@ -50,6 +51,9 @@ class MultisigTransactionUtils {
         const { minApprovals, onlyListed } = body.governance;
 
         const repositoryAddress = multisigPlugin.repositoryAddresses[dao.network];
+        // Use the published version on Harmony (release 1, build 1), otherwise the plugin default
+        const versionTag =
+            dao.network === Network.HARMONY_MAINNET ? { release: 1, build: 1 } : multisigPlugin.installVersion;
 
         const memberAddresses = members.map((member) => member.address as Hex);
         const multisigTarget = pluginTransactionUtils.getPluginTargetConfig(dao, stageVotingPeriod != null);
@@ -64,7 +68,7 @@ class MultisigTransactionUtils {
 
         const transactionData = pluginTransactionUtils.buildPrepareInstallationData(
             repositoryAddress,
-            multisigPlugin.installVersion,
+            versionTag,
             pluginSettingsData,
             dao.address as Hex,
         );
