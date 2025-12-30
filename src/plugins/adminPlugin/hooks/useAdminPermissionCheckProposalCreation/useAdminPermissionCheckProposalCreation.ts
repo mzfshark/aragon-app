@@ -1,4 +1,4 @@
-import { useMemberExists } from '@/modules/governance/api/governanceService';
+import { useCanCreateProposal } from '@/modules/governance/api/governanceService/queries/useCanCreateProposal';
 import type { IPermissionCheckGuardParams, IPermissionCheckGuardResult } from '@/modules/governance/types';
 import { useTranslations } from '@/shared/components/translationsProvider';
 import { daoUtils } from '@/shared/utils/daoUtils';
@@ -16,11 +16,15 @@ export const useAdminPermissionCheckProposalCreation = (
 
     const { network } = daoUtils.parseDaoId(daoId);
 
-    const memberExistsParams = {
-        urlParams: { memberAddress: address as string, pluginAddress: plugin.address, network },
-        queryParams: { network },
+    const canCreateProposalParams = {
+        queryParams: {
+            memberAddress: address as string,
+            pluginAddress: plugin.address,
+            network,
+        },
     };
-    const { data, isLoading } = useMemberExists(memberExistsParams, { enabled: address != null });
+
+    const { data, isLoading } = useCanCreateProposal(canCreateProposalParams, { enabled: address != null });
     const hasPermission = data?.status === true;
 
     const pluginName = daoUtils.getPluginName(plugin);
