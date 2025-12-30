@@ -11,7 +11,7 @@ class IpfsUtils {
 
     private getIpfsGateway = (): string => {
         const gateway = process.env.NEXT_PUBLIC_IPFS_GATEWAY;
-        return gateway?.trim() ? gateway.trim().replace(/\/$/, '') : 'https://aragon-1.mypinata.cloud';
+        return gateway?.trim() ? gateway.trim().replace(/\/$/, '') : 'https://amethyst-blank-puma-863.mypinata.cloud';
     };
 
     private normalizeIpfsPath = (value?: string | null): string | undefined => {

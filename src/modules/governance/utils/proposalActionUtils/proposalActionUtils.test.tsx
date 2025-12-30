@@ -167,7 +167,7 @@ describe('proposalActionUtils', () => {
             const normalizedLinks = [{ label: 'test', href: 'href' }];
             normalizeActionMetadataLinksSpy.mockReturnValue(normalizedLinks);
 
-            const expectedAvatarUrl = 'https://aragon-1.mypinata.cloud/ipfs/valid-cid?img-width=80&img-height=80';
+            const expectedAvatarUrl = 'https://amethyst-blank-puma-863.mypinata.cloud/ipfs/valid-cid?img-width=80&img-height=80';
             ipfsCidToSrcSpy.mockReturnValue(expectedAvatarUrl);
             const normalizedMetadata = proposalActionUtils.normalizeActionMetadata(metadata);
             expect(normalizeActionMetadataLinksSpy).toHaveBeenCalledWith(metadata.links);
@@ -247,7 +247,7 @@ describe('proposalActionUtils', () => {
                 avatar: 'ipfs://valid-cid',
             };
 
-            const expectedAvatarUrl = 'https://aragon-1.mypinata.cloud/ipfs/valid-cid?img-width=80&img-height=80';
+            const expectedAvatarUrl = 'https://amethyst-blank-puma-863.mypinata.cloud/ipfs/valid-cid?img-width=80&img-height=80';
             ipfsCidToSrcSpy.mockReturnValue(expectedAvatarUrl);
 
             const result = proposalActionUtils.normalizeActionMetadataAvatar(metadata);
