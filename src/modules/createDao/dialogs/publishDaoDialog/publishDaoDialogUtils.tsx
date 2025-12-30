@@ -164,10 +164,11 @@ class PublishDaoDialogUtils {
         connectedAddress: string,
         versionTag: { release: number; build: number },
         target: Hex,
+        operation: 0 | 1,
     ) => {
         const pluginSettingsData = encodeAbiParameters(adminPluginSetupAbi, [
             connectedAddress as Hex,
-            { target, operation: 0 },
+            { target, operation },
         ]);
 
         const pluginSettingsParams = {
@@ -225,9 +226,16 @@ class PublishDaoDialogUtils {
         // Define um target válido (não-zero) para a configuração do plugin
         const { globalExecutor } = networkDefinitions[network].addresses;
         const target = (globalExecutor || daoFactory) as Hex;
+        const operation: 0 | 1 = globalExecutor ? 1 : 0;
 
         for (const tag of candidates) {
-            const pluginSettings = this.buildPluginSettingsParams(adminPluginRepo, connectedAddress, tag, target);
+            const pluginSettings = this.buildPluginSettingsParams(
+                adminPluginRepo,
+                connectedAddress,
+                tag,
+                target,
+                operation,
+            );
             try {
                 await getPublicClient(network).simulateContract({
                     abi: daoFactoryAbi,
