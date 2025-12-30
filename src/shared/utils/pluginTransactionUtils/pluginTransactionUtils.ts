@@ -6,6 +6,7 @@ import {
     encodeFunctionData,
     keccak256,
     parseEventLogs,
+    zeroHash,
     type Hex,
     type TransactionReceipt,
 } from 'viem';
@@ -31,6 +32,58 @@ class PluginTransactionUtils {
         call: 0,
         delegateCall: 1,
     };
+
+    // Minimal ABI for DAO.execute (IExecutor)
+    private daoExecuteAbi = [
+        {
+            type: 'function',
+            name: 'execute',
+            stateMutability: 'nonpayable',
+            inputs: [
+                { name: '_callId', type: 'bytes32' },
+                {
+                    name: '_actions',
+                    type: 'tuple[]',
+                    components: [
+                        { name: 'to', type: 'address' },
+                        { name: 'value', type: 'uint256' },
+                        { name: 'data', type: 'bytes' },
+                    ],
+                },
+                { name: '_allowFailureMap', type: 'uint256' },
+            ],
+            outputs: [
+                { name: 'execResults', type: 'bytes[]' },
+                { name: 'failureMap', type: 'uint256' },
+            ],
+        },
+    ] as const;
+
+    private wrapAsDaoExecuteOnHarmony(dao: IDao, tx: ITransactionRequest): ITransactionRequest {
+        const daoAddress = dao.address as Hex;
+
+        // Apenas Harmony: lá o executor é um contrato (globalExecutor) que normalmente não tem ROOT.
+        if (dao.network !== 'harmony-mainnet') {
+            return tx;
+        }
+
+        // Só faz sentido envolver quando estamos chamando o próprio DAO (PermissionManager do DAO).
+        if ((tx.to as string).toLowerCase() !== daoAddress.toLowerCase()) {
+            return tx;
+        }
+
+        const wrappedData = encodeFunctionData({
+            abi: this.daoExecuteAbi,
+            functionName: 'execute',
+            args: [
+                zeroHash,
+                [{ to: daoAddress, value: BigInt(0), data: tx.data as Hex }],
+                BigInt(0),
+            ],
+        });
+
+        return { to: daoAddress, data: wrappedData, value: BigInt(0) };
+    }
 
     getPluginInstallationSetupData = (receipt: TransactionReceipt): IPluginInstallationSetupData[] => {
         const { logs } = receipt;
@@ -119,6 +172,9 @@ class PluginTransactionUtils {
             to: daoAddress,
         });
 
+        const grantRootWrapped = this.wrapAsDaoExecuteOnHarmony(dao, grantRootTx);
+        const revokeRootWrapped = this.wrapAsDaoExecuteOnHarmony(dao, revokeRootTx);
+
         // If executeConditionAddress is provided, we need to revoke the execute permission and grant it with the condition.
         // The first plugin in the setupData is either the SPP or the plugin for basic governance processes.
         const needsExecuteCondition = executeConditionAddress != null;
@@ -130,14 +186,18 @@ class PluginTransactionUtils {
               })
             : [];
 
+        const executeWithConditionWrapped = executeWithConditionTransactions.map((tx) =>
+            this.wrapAsDaoExecuteOnHarmony(dao, tx),
+        );
+
         const applyInstallationActions = setupData.map((data) => this.setupInstallationDataToAction(data, dao));
 
         return [
-            grantRootTx,
+            grantRootWrapped,
             ...applyInstallationActions,
             ...actions,
-            revokeRootTx,
-            ...executeWithConditionTransactions,
+            revokeRootWrapped,
+            ...executeWithConditionWrapped,
         ];
     };
 
@@ -157,6 +217,9 @@ class PluginTransactionUtils {
             to: dao.address as Hex,
         });
 
+        const grantRootWrapped = this.wrapAsDaoExecuteOnHarmony(dao, grantRootTx);
+        const revokeRootWrapped = this.wrapAsDaoExecuteOnHarmony(dao, revokeRootTx);
+
         const pluginSetupRef = { versionTag, pluginSetupRepo };
         const uninstallData = encodeFunctionData({
             abi: pluginSetupProcessorAbi,
@@ -166,7 +229,7 @@ class PluginTransactionUtils {
 
         const uninstallAction = { to: pluginSetupProcessor, data: uninstallData, value: BigInt(0) };
 
-        return [grantRootTx, uninstallAction, revokeRootTx];
+        return [grantRootWrapped, uninstallAction, revokeRootWrapped];
     };
 
     buildApplyPluginsUpdateActions = (params: IBuildApplyPluginsUpdateActionsParams): ITransactionRequest[] => {
@@ -207,9 +270,12 @@ class PluginTransactionUtils {
             to: daoAddress,
         });
 
+        const grantUpgradeWrapped = this.wrapAsDaoExecuteOnHarmony(dao, grantUpgradeTx);
+        const revokeUpgradeWrapped = this.wrapAsDaoExecuteOnHarmony(dao, revokeUpgradeTx);
+
         const applyUpdateTransaction = this.setupUpdateDataToAction(dao, plugin, setupData);
 
-        return [grantUpgradeTx, applyUpdateTransaction, revokeUpgradeTx];
+        return [grantUpgradeWrapped, applyUpdateTransaction, revokeUpgradeWrapped];
     };
 
     private setupUpdateDataToAction = (dao: IDao, plugin: IDaoPlugin, setupData: IPluginUpdateSetupData) => {
