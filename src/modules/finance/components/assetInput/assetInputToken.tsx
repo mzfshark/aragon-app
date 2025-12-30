@@ -1,8 +1,11 @@
 import { useTranslations } from '@/shared/components/translationsProvider';
+import { networkDefinitions } from '@/shared/constants/networkDefinitions';
 import { Avatar } from '@aragon/gov-ui-kit';
 import classNames from 'classnames';
 import type { ComponentProps } from 'react';
 import type { IToken } from '../../api/financeService';
+
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export interface IAssetInputTokenProps extends ComponentProps<'div'> {
     /**
@@ -16,10 +19,14 @@ export const AssetInputToken: React.FC<IAssetInputTokenProps> = (props) => {
 
     const { t } = useTranslations();
 
+    const isNativeToken = token?.address?.toLowerCase() === ZERO_ADDRESS;
+    const nativeSymbol = token ? networkDefinitions[token.network]?.nativeCurrency?.symbol : undefined;
+    const symbol = token ? token.symbol || (isNativeToken ? nativeSymbol : '') : '';
+
     return (
         <div className={classNames('flex items-center gap-x-1.5', className)} {...otherProps}>
             {token && <Avatar src={token.logo} size="xs" />}
-            {token ? token.symbol : t('app.finance.assetInput.token.trigger')}
+            {token ? symbol : t('app.finance.assetInput.token.trigger')}
         </div>
     );
 };
