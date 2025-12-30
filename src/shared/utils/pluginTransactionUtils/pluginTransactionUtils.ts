@@ -6,6 +6,7 @@ import {
     encodeFunctionData,
     keccak256,
     parseEventLogs,
+    toBytes,
     zeroHash,
     type Hex,
     type TransactionReceipt,
@@ -59,6 +60,16 @@ class PluginTransactionUtils {
         },
     ] as const;
 
+    private harmonySelectors = {
+        daoExecute: keccak256(toBytes('execute(bytes32,(address,uint256,bytes)[],uint256)')).slice(0, 10).toLowerCase(),
+        sppUpdateStages: keccak256(
+            toBytes('updateStages(((address,bool,bool,uint8)[],uint64,uint64,uint64,uint16,uint16,bool,bool)[])'),
+        )
+            .slice(0, 10)
+            .toLowerCase(),
+        sppUpdateRules: keccak256(toBytes('updateRules((uint8,uint8,uint240,bytes32)[])')).slice(0, 10).toLowerCase(),
+    } as const;
+
     private wrapAsDaoExecuteOnHarmony(dao: IDao, tx: ITransactionRequest): ITransactionRequest {
         const daoAddress = dao.address as Hex;
 
@@ -70,9 +81,20 @@ class PluginTransactionUtils {
         }
 
         const txTo = (tx.to as string).toLowerCase();
+
+        const txDataSelector = (tx.data as string).slice(0, 10).toLowerCase();
+
+        // Se já for um DAO.execute, não embrulhar de novo.
+        if (txTo === daoAddress.toLowerCase() && txDataSelector === this.harmonySelectors.daoExecute) {
+            return tx;
+        }
+
         const shouldWrap =
             txTo === daoAddress.toLowerCase() ||
-            txTo === (pluginSetupProcessor as string).toLowerCase();
+            txTo === (pluginSetupProcessor as string).toLowerCase() ||
+            // Multi-etapas (SPP): essas chamadas precisam rodar com msg.sender == DAO na Harmony.
+            txDataSelector === this.harmonySelectors.sppUpdateStages ||
+            txDataSelector === this.harmonySelectors.sppUpdateRules;
 
         // Envolve apenas chamadas que precisam acontecer com `msg.sender == DAO`.
         if (!shouldWrap) {

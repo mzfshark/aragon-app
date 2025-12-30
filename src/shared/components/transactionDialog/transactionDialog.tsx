@@ -93,7 +93,14 @@ export const TransactionDialog = <TCustomStepId extends string>(props: ITransact
         if (transaction == null) {
             errorHandler(new Error('TransactionDialog: transaction must be defined.'));
         } else {
-            sendTransaction(transaction, { onError: errorHandler });
+            const transactionWithGasOverride =
+                // Harmony: alguns RPCs aplicam gascap baixo em eth_call/estimateGas para calldata grande.
+                // Para PROPOSAL_CREATE (especialmente multi-etapas), isso pode virar "OutOfGas" na estimativa.
+                network === Network.HARMONY_MAINNET && transactionType != null
+                    ? { ...transaction, gas: transaction.gas ?? BigInt(12_000_000) }
+                    : transaction;
+
+            sendTransaction(transactionWithGasOverride, { onError: errorHandler });
         }
     }, [transaction, sendTransaction, handleTransactionError]);
 
