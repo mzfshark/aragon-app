@@ -62,22 +62,31 @@ class PluginTransactionUtils {
     private wrapAsDaoExecuteOnHarmony(dao: IDao, tx: ITransactionRequest): ITransactionRequest {
         const daoAddress = dao.address as Hex;
 
+        const { pluginSetupProcessor } = networkDefinitions[dao.network].addresses;
+
         // Apenas Harmony: lá o executor é um contrato (globalExecutor) que normalmente não tem ROOT.
         if (dao.network !== 'harmony-mainnet') {
             return tx;
         }
 
-        // Só faz sentido envolver quando estamos chamando o próprio DAO (PermissionManager do DAO).
-        if ((tx.to as string).toLowerCase() !== daoAddress.toLowerCase()) {
+        const txTo = (tx.to as string).toLowerCase();
+        const shouldWrap =
+            txTo === daoAddress.toLowerCase() ||
+            txTo === (pluginSetupProcessor as string).toLowerCase();
+
+        // Envolve apenas chamadas que precisam acontecer com `msg.sender == DAO`.
+        if (!shouldWrap) {
             return tx;
         }
+
+        const innerValue = tx.value ?? BigInt(0);
 
         const wrappedData = encodeFunctionData({
             abi: this.daoExecuteAbi,
             functionName: 'execute',
             args: [
                 zeroHash,
-                [{ to: daoAddress, value: BigInt(0), data: tx.data as Hex }],
+                [{ to: tx.to as Hex, value: innerValue, data: tx.data as Hex }],
                 BigInt(0),
             ],
         });
@@ -190,12 +199,16 @@ class PluginTransactionUtils {
             this.wrapAsDaoExecuteOnHarmony(dao, tx),
         );
 
-        const applyInstallationActions = setupData.map((data) => this.setupInstallationDataToAction(data, dao));
+        const applyInstallationActions = setupData
+            .map((data) => this.setupInstallationDataToAction(data, dao))
+            .map((tx) => this.wrapAsDaoExecuteOnHarmony(dao, tx));
+
+        const extraActionsWrapped = actions.map((tx) => this.wrapAsDaoExecuteOnHarmony(dao, tx));
 
         return [
             grantRootWrapped,
             ...applyInstallationActions,
-            ...actions,
+            ...extraActionsWrapped,
             revokeRootWrapped,
             ...executeWithConditionWrapped,
         ];
@@ -227,7 +240,11 @@ class PluginTransactionUtils {
             args: [dao.address as Hex, { plugin: pluginAddress, pluginSetupRef, permissions }],
         });
 
-        const uninstallAction = { to: pluginSetupProcessor, data: uninstallData, value: BigInt(0) };
+        const uninstallAction = this.wrapAsDaoExecuteOnHarmony(dao, {
+            to: pluginSetupProcessor,
+            data: uninstallData,
+            value: BigInt(0),
+        });
 
         return [grantRootWrapped, uninstallAction, revokeRootWrapped];
     };
@@ -251,8 +268,8 @@ class PluginTransactionUtils {
                 to: daoAddress,
             });
 
-            applyUpdateTransactions.unshift(grantRootTx);
-            applyUpdateTransactions.push(revokeRootTx);
+            applyUpdateTransactions.unshift(this.wrapAsDaoExecuteOnHarmony(dao, grantRootTx));
+            applyUpdateTransactions.push(this.wrapAsDaoExecuteOnHarmony(dao, revokeRootTx));
         }
 
         return applyUpdateTransactions;
@@ -273,7 +290,10 @@ class PluginTransactionUtils {
         const grantUpgradeWrapped = this.wrapAsDaoExecuteOnHarmony(dao, grantUpgradeTx);
         const revokeUpgradeWrapped = this.wrapAsDaoExecuteOnHarmony(dao, revokeUpgradeTx);
 
-        const applyUpdateTransaction = this.setupUpdateDataToAction(dao, plugin, setupData);
+        const applyUpdateTransaction = this.wrapAsDaoExecuteOnHarmony(
+            dao,
+            this.setupUpdateDataToAction(dao, plugin, setupData),
+        );
 
         return [grantUpgradeWrapped, applyUpdateTransaction, revokeUpgradeWrapped];
     };
