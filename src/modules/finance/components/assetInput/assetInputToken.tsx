@@ -21,7 +21,9 @@ export const AssetInputToken: React.FC<IAssetInputTokenProps> = (props) => {
 
     const isNativeToken = token?.address?.toLowerCase() === ZERO_ADDRESS;
     const nativeSymbol = token ? networkDefinitions[token.network]?.nativeCurrency?.symbol : undefined;
-    const symbol = token ? token.symbol || (isNativeToken ? nativeSymbol : '') : '';
+    const rawSymbol = token?.symbol?.trim();
+    const isUnknownSymbol = rawSymbol?.toUpperCase() === 'UNKNOWN';
+    const symbol = token ? (isNativeToken && (!rawSymbol || isUnknownSymbol) ? nativeSymbol : rawSymbol) ?? '' : '';
 
     return (
         <div className={classNames('flex items-center gap-x-1.5', className)} {...otherProps}>
