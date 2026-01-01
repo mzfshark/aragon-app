@@ -6,8 +6,6 @@ import {
     encodeFunctionData,
     keccak256,
     parseEventLogs,
-    toBytes,
-    zeroHash,
     type Hex,
     type TransactionReceipt,
 } from 'viem';
@@ -34,86 +32,12 @@ class PluginTransactionUtils {
         delegateCall: 1,
     };
 
-    // Minimal ABI for DAO.execute (IExecutor)
-    private daoExecuteAbi = [
-        {
-            type: 'function',
-            name: 'execute',
-            stateMutability: 'nonpayable',
-            inputs: [
-                { name: '_callId', type: 'bytes32' },
-                {
-                    name: '_actions',
-                    type: 'tuple[]',
-                    components: [
-                        { name: 'to', type: 'address' },
-                        { name: 'value', type: 'uint256' },
-                        { name: 'data', type: 'bytes' },
-                    ],
-                },
-                { name: '_allowFailureMap', type: 'uint256' },
-            ],
-            outputs: [
-                { name: 'execResults', type: 'bytes[]' },
-                { name: 'failureMap', type: 'uint256' },
-            ],
-        },
-    ] as const;
-
-    private harmonySelectors = {
-        daoExecute: keccak256(toBytes('execute(bytes32,(address,uint256,bytes)[],uint256)')).slice(0, 10).toLowerCase(),
-        sppUpdateStages: keccak256(
-            toBytes('updateStages(((address,bool,bool,uint8)[],uint64,uint64,uint64,uint16,uint16,bool,bool)[])'),
-        )
-            .slice(0, 10)
-            .toLowerCase(),
-        sppUpdateRules: keccak256(toBytes('updateRules((uint8,uint8,uint240,bytes32)[])')).slice(0, 10).toLowerCase(),
-    } as const;
-
     private wrapAsDaoExecuteOnHarmony(dao: IDao, tx: ITransactionRequest): ITransactionRequest {
-        const daoAddress = dao.address as Hex;
-
-        const { pluginSetupProcessor } = networkDefinitions[dao.network].addresses;
-
-        // Apenas Harmony: lá o executor é um contrato (globalExecutor) que normalmente não tem ROOT.
-        if (dao.network !== 'harmony-mainnet') {
-            return tx;
-        }
-
-        const txTo = (tx.to as string).toLowerCase();
-
-        const txDataSelector = (tx.data as string).slice(0, 10).toLowerCase();
-
-        // Se já for um DAO.execute, não embrulhar de novo.
-        if (txTo === daoAddress.toLowerCase() && txDataSelector === this.harmonySelectors.daoExecute) {
-            return tx;
-        }
-
-        const shouldWrap =
-            txTo === daoAddress.toLowerCase() ||
-            txTo === (pluginSetupProcessor as string).toLowerCase() ||
-            // Multi-etapas (SPP): essas chamadas precisam rodar com msg.sender == DAO na Harmony.
-            txDataSelector === this.harmonySelectors.sppUpdateStages ||
-            txDataSelector === this.harmonySelectors.sppUpdateRules;
-
-        // Envolve apenas chamadas que precisam acontecer com `msg.sender == DAO`.
-        if (!shouldWrap) {
-            return tx;
-        }
-
-        const innerValue = tx.value ?? BigInt(0);
-
-        const wrappedData = encodeFunctionData({
-            abi: this.daoExecuteAbi,
-            functionName: 'execute',
-            args: [
-                zeroHash,
-                [{ to: tx.to as Hex, value: innerValue, data: tx.data as Hex }],
-                BigInt(0),
-            ],
-        });
-
-        return { to: daoAddress, data: wrappedData, value: BigInt(0) };
+        // Historicamente, a Harmony precisava de um wrapper que embrulhava certas chamadas em `DAO.execute()`.
+        // Porém, as transações montadas aqui viram *ações de proposta* e já são executadas via `DAO.execute()`.
+        // Embrulhar de novo causa `ReentrantCall()` (DAO.execute aninhado) durante a execução da proposta.
+        void dao;
+        return tx;
     }
 
     getPluginInstallationSetupData = (receipt: TransactionReceipt): IPluginInstallationSetupData[] => {
