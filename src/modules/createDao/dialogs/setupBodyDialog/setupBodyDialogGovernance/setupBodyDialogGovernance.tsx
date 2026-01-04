@@ -8,10 +8,14 @@ export interface ISetupBodyDialogGovernanceProps {
      * Renders the correct governance settings depending if the plugin is setup as a sub-plugin or not.
      */
     isSubPlugin?: boolean;
+    /**
+     * ID of the DAO.
+     */
+    daoId?: string;
 }
 
 export const SetupBodyDialogGovernance: React.FC<ISetupBodyDialogGovernanceProps> = (props) => {
-    const { isSubPlugin } = props;
+    const { isSubPlugin, daoId } = props;
 
     const selectedPlugin = useWatch<Record<string, ISetupBodyForm['plugin']>>({ name: 'plugin' });
 
@@ -25,6 +29,7 @@ export const SetupBodyDialogGovernance: React.FC<ISetupBodyDialogGovernanceProps
             isSubPlugin={isSubPlugin}
             showProposalCreationSettings={false}
             membershipSettings={membershipSettings}
+            daoId={daoId}
         />
     );
 };

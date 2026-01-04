@@ -1891,6 +1891,36 @@
           "title": "You can't unlock yet"
         }
       },
+      "harmonyHipVoting": {
+        "setup": {
+          "description": "Off-chain voting power with on-chain finalization",
+          "name": "Harmony HIP voting"
+        }
+      },
+      "harmonyDelegationVoting": {
+        "setup": {
+          "description": "Off-chain delegated voting power with on-chain finalization",
+          "name": "Harmony delegation voting"
+        }
+      },
+      "harmonyVoting": {
+        "setupGovernance": {
+          "helpText": "Configure who can propose and which address can finalize results.",
+          "oracle": {
+            "label": "Oracle address",
+            "placeholder": "0x…"
+          },
+          "proposer": {
+            "label": "Proposer address",
+            "placeholder": "0x…"
+          },
+          "title": "Governance"
+        },
+        "setupMembership": {
+          "helpText": "No membership settings are required for this plugin.",
+          "title": "Membership"
+        }
+      },
       "multisig": {
         "meta": {
           "setup": {

@@ -4,6 +4,7 @@ import { initialiseCapitalDistributorPlugin } from './capitalDistributorPlugin';
 import { capitalDistributorPluginDialogsDefinitions } from './capitalDistributorPlugin/constants/capitalDistributorPluginDialogsDefinitions';
 import { initialiseGaugeVoterPlugin } from './gaugeVoterPlugin';
 import { gaugeVoterPluginDialogsDefinitions } from './gaugeVoterPlugin/constants/gaugeVoterPluginDialogsDefinitions';
+import { initialiseHarmonyVotingPlugin } from './harmonyVotingPlugin';
 import { initialiseLockToVotePlugin } from './lockToVotePlugin';
 import { lockToVotePluginDialogsDefinitions } from './lockToVotePlugin/constants/lockToVotePluginDialogsDefinitions';
 import { initialiseMultisigPlugin } from './multisigPlugin';
@@ -21,6 +22,7 @@ export const initialisePlugins = () => {
     initialiseLockToVotePlugin();
     initialiseSppPlugin();
     initialiseGaugeVoterPlugin();
+    initialiseHarmonyVotingPlugin();
 };
 
 export const pluginDialogsDefinitions = {

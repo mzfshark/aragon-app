@@ -56,7 +56,7 @@ export const SetupBodyDialogSteps: React.FC<ISetupBodyDialogStepsProps> = (props
                 <SetupBodyDialogMembership daoId={daoId} />
             </WizardDialog.Step>
             <WizardDialog.Step {...governanceStep} hidden={isExternalPlugin}>
-                <SetupBodyDialogGovernance isSubPlugin={isSubPlugin} />
+                <SetupBodyDialogGovernance isSubPlugin={isSubPlugin} daoId={daoId} />
             </WizardDialog.Step>
         </>
     );
