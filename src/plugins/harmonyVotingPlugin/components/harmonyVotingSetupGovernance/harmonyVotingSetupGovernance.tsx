@@ -16,7 +16,11 @@ export const HarmonyVotingSetupGovernance: React.FC<IHarmonyVotingSetupGovernanc
     const network = useMemo(() => (daoId ? daoUtils.parseDaoId(daoId).network : undefined), [daoId]);
     const chainId = network ? networkDefinitions[network].id : undefined;
 
-    const proposerField = useFormField<IHarmonyVotingSetupGovernanceForm, 'proposer'>('proposer', {
+    const {
+        value: proposerValue,
+        onChange: onProposerChange,
+        ...proposerField
+    } = useFormField<IHarmonyVotingSetupGovernanceForm, 'proposer'>('proposer', {
         fieldPrefix: formPrefix,
         label: t('app.plugins.harmonyVoting.setupGovernance.proposer.label'),
         rules: {
@@ -26,7 +30,11 @@ export const HarmonyVotingSetupGovernance: React.FC<IHarmonyVotingSetupGovernanc
         sanitizeOnBlur: false,
     });
 
-    const oracleField = useFormField<IHarmonyVotingSetupGovernanceForm, 'oracle'>('oracle', {
+    const {
+        value: oracleValue,
+        onChange: onOracleChange,
+        ...oracleField
+    } = useFormField<IHarmonyVotingSetupGovernanceForm, 'oracle'>('oracle', {
         fieldPrefix: formPrefix,
         label: t('app.plugins.harmonyVoting.setupGovernance.oracle.label'),
         rules: {
@@ -36,17 +44,17 @@ export const HarmonyVotingSetupGovernance: React.FC<IHarmonyVotingSetupGovernanc
         sanitizeOnBlur: false,
     });
 
-    const [proposerInput, setProposerInput] = useState<string | undefined>(proposerField.value);
-    const [oracleInput, setOracleInput] = useState<string | undefined>(oracleField.value);
+    const [proposerInput, setProposerInput] = useState<string | undefined>(proposerValue);
+    const [oracleInput, setOracleInput] = useState<string | undefined>(oracleValue);
 
     const handleProposerAccept = useCallback(
-        (value?: IAddressInputResolvedValue) => proposerField.onChange(value?.address ?? ''),
-        [proposerField],
+        (value?: IAddressInputResolvedValue) => onProposerChange(value?.address ?? ''),
+        [onProposerChange],
     );
 
     const handleOracleAccept = useCallback(
-        (value?: IAddressInputResolvedValue) => oracleField.onChange(value?.address ?? ''),
-        [oracleField],
+        (value?: IAddressInputResolvedValue) => onOracleChange(value?.address ?? ''),
+        [onOracleChange],
     );
 
     return (
