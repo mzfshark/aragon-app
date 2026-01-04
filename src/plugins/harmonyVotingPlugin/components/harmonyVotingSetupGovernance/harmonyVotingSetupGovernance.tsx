@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useTranslations } from '@/shared/components/translationsProvider';
 import { InputContainer } from '@aragon/gov-ui-kit';
 import type { IHarmonyVotingSetupGovernanceProps } from './harmonyVotingSetupGovernance.api';
