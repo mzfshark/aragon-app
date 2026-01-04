@@ -4,9 +4,7 @@ import { useTranslations } from '@/shared/components/translationsProvider';
 import { InputContainer } from '@aragon/gov-ui-kit';
 import type { IHarmonyVotingSetupGovernanceProps } from './harmonyVotingSetupGovernance.api';
 
-export const HarmonyVotingSetupGovernance: React.FC<IHarmonyVotingSetupGovernanceProps> = (props) => {
-    void props as IHarmonyVotingSetupGovernanceProps & { formPrefix?: string } & { daoId?: string };
-
+export const HarmonyVotingSetupGovernance: React.FC<IHarmonyVotingSetupGovernanceProps> = () => {
     const { t } = useTranslations();
 
     return (
